@@ -210,7 +210,6 @@ std::unordered_map<std::string, uint32_t> keys = {
     {"Offroad_HardwareUnsupported", CLEAR_ON_MANAGER_START},
     {"ForcePowerDown", CLEAR_ON_MANAGER_START},
     {"LkasFullRangeAvailable", PERSISTENT},
-    {"ChryslerMangoLat", PERSISTENT},
     {"ChryslerMangoLong", PERSISTENT},
 };
 

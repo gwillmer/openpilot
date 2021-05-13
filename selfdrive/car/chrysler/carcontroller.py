@@ -1,7 +1,7 @@
 from common.op_params import opParams
 from selfdrive.car import apply_toyota_steer_torque_limits
 from selfdrive.car.chrysler.chryslercan import create_lkas_hud, create_lkas_command, \
-  create_wheel_buttons, create_mango_hud, create_op_acc_1, create_op_acc_2, create_op_dashboard, create_op_chime
+  create_wheel_buttons, create_op_acc_1, create_op_acc_2, create_op_dashboard, create_op_chime
 from selfdrive.car.chrysler.values import CAR, CarControllerParams
 from opendbc.can.packer import CANPacker
 from selfdrive.car.interfaces import GearShifter
@@ -29,9 +29,8 @@ class CarController():
     self.wheel_button_counter_prev = 0
     self.lead_dist_at_stop = 0
     self.hybridEcu = CP.enablehybridEcu
-    self.mango_lat_active = Params().get_bool('ChryslerMangoLat')
     self.full_range_steer = Params().get_bool('LkasFullRangeAvailable')
-    self.mango_mode_active = self.mango_lat_active or self.full_range_steer
+    self.mango_mode_active = self.full_range_steer
     #OPLong starts here
     self.op_long_enable = CP.openpilotLongitudinalControl
     self.acc_available = True
@@ -66,8 +65,6 @@ class CarController():
 
     if self.full_range_steer:
       wp_type = int(1)
-    if self.mango_lat_active:
-      wp_type = int(2)
 
     if enabled:
       if self.timer < 99 and wp_type == 1 and CS.out.vEgo < 65:
@@ -104,15 +101,7 @@ class CarController():
       self.steerErrorMod = CS.steerError
       if self.steerErrorMod:
         self.steer_type = int(0)
-    elif CS.apaFault or CS.out.gearShifter not in (GearShifter.drive, GearShifter.low) or \
-            not CS.veh_on or CS.apa_steer_status:
-      self.steer_type = int(0)
     
-    if self.steer_type == int(0) and CS.out.gearShifter in (GearShifter.drive, GearShifter.low) and not CS.apaFault:
-      self.hightorqUnavailable = True
-
-    self.apaActive = CS.apasteerOn and self.steer_type == 2
-
     can_sends = []
 
     #*** control msgs ***
@@ -151,12 +140,6 @@ class CarController():
 
     # LKAS_HEARTBIT is forwarded by Panda so no need to send it here.
     # frame is 100Hz (0.01s period)
-    if (self.ccframe % 2 == 0) and wp_type == 2:  # 0.02s period
-      new_msg = create_mango_hud(
-          self.packer, self.apaActive, CS.apaFault, lkas_active,
-          self.steer_type)
-      can_sends.append(new_msg)
-
     if (self.ccframe % 2 == 0) and wp_type != 2:  # 0.25s period
       new_msg = create_lkas_hud(
           self.packer, CS.out.gearShifter, lkas_active,

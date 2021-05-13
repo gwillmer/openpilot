@@ -72,16 +72,6 @@ def apply_toyota_steer_torque_limits(apply_torque, apply_torque_last, motor_torq
 
   apply_torque = clip(apply_torque, min_lim, max_lim)
 
-  if Params().get_bool('ChryslerMangoLat'):
-    if abs(apply_torque) < 40:
-      LIMITS.STEER_DELTA_UP = 2.
-    elif abs(apply_torque) < 50:
-      LIMITS.STEER_DELTA_UP = 1.8
-    elif abs(apply_torque) < 60:
-      LIMITS.STEER_DELTA_UP = 1.6
-    elif abs(apply_torque) < 350:
-      LIMITS.STEER_DELTA_UP = 1.4
-
   # slow rate if steer torque increases in magnitude
   if apply_torque_last > 0:
     apply_torque = clip(apply_torque,

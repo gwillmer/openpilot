@@ -44,24 +44,11 @@ class CarInterface(CarInterfaceBase):
     ret.startingBrakeRate = 2.0 # brake_travel/s while releasing on restart
     ret.stoppingControl = True
 
-    if not Params().get_bool('ChryslerMangoLat'):
-      ret.lateralTuning.pid.kpBP, ret.lateralTuning.pid.kiBP = [[9., 20.], [9., 20.]]
-      ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.1, 0.15], [0.02, 0.03]]
-      ret.lateralTuning.pid.kfBP = [0.]
-      ret.lateralTuning.pid.kfV = [0.00005]   # full torque for 10 deg at 80mph means 0.00007818594
-    else:
-      ret.lateralTuning.pid.kpBP = [0., 10., 30.]
-      ret.lateralTuning.pid.kpV = [0.03, 0.05, 0.06]
-
-      ret.lateralTuning.pid.kiBP = [0., 30.]
-      ret.lateralTuning.pid.kiV = [0.02, 0.03]
-
-      ret.lateralTuning.pid.kdBP = [0.]
-      ret.lateralTuning.pid.kdV = [10.]
-
-      ret.lateralTuning.pid.kfBP = [0.]
-      ret.lateralTuning.pid.kfV = [0.00002]   # full torque for 10 deg at 80mph means 0.00007818594
-
+    ret.lateralTuning.pid.kpBP, ret.lateralTuning.pid.kiBP = [[9., 20.], [9., 20.]]
+    ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.1, 0.15], [0.02, 0.03]]
+    ret.lateralTuning.pid.kfBP = [0.]
+    ret.lateralTuning.pid.kfV = [0.00005]   # full torque for 10 deg at 80mph means 0.00007818594
+    
     ret.steerActuatorDelay = 0.01
     ret.steerRateCost = 0.35
     ret.steerLimitTimer = 0.7
@@ -73,10 +60,10 @@ class CarInterface(CarInterfaceBase):
 
     ret.centerToFront = ret.wheelbase * 0.44
 
-    ret.minSteerSpeed = 3.8  # m/s
+    ret.minSteerSpeed = 3.8 if not Params().get_bool('LkasFullRangeAvailable') else 0 # m/s
     if candidate in (CAR.PACIFICA_2019_HYBRID, CAR.PACIFICA_2020, CAR.JEEP_CHEROKEE_2019):
       # TODO allow 2019 cars to steer down to 13 m/s if already engaged.
-      ret.minSteerSpeed = 17.5  if not Params().get_bool('ChryslerMangoLat') and not Params().get_bool('LkasFullRangeAvailable') else 0 # m/s 17 on the way up, 13 on the way down once engaged.
+      ret.minSteerSpeed = 17.5  if not Params().get_bool('LkasFullRangeAvailable') else 0 # m/s 17 on the way up, 13 on the way down once engaged.
 
     # starting with reasonable value for civic and scaling by mass and wheelbase
     ret.rotationalInertia = scale_rot_inertia(ret.mass, ret.wheelbase)
@@ -111,7 +98,7 @@ class CarInterface(CarInterfaceBase):
     events = self.create_common_events(ret, extra_gears=[car.CarState.GearShifter.low],
                                        gas_resume_speed=2.)
 
-    if ret.vEgo < self.CP.minSteerSpeed and not Params().get_bool('ChryslerMangoLat') and not Params().get_bool('LkasFullRangeAvailable'):
+    if ret.vEgo < self.CP.minSteerSpeed and not Params().get_bool('LkasFullRangeAvailable'):
       events.add(car.CarEvent.EventName.belowSteerSpeed)
 
     if self.CC.acc_enabled and (self.CS.accbrakeFaulted or self.CS.accengFaulted):

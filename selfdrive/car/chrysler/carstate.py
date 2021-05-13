@@ -60,7 +60,7 @@ class CarState(CarStateBase):
     ret.cruiseState.nonAdaptive = cp.vl["DASHBOARD"]['CRUISE_STATE'] in [1, 2]
 
     ret.steeringTorque = cp.vl["EPS_STATUS"]["TORQUE_DRIVER"]/4
-    ret.steeringTorqueEps = cp.vl["EPS_STATUS"]["TORQUE_MOTOR"]/4 if Params().get_bool('ChryslerMangoLat') else cp.vl["EPS_STATUS"]["TORQUE_MOTOR"]
+    ret.steeringTorqueEps = cp.vl["EPS_STATUS"]["TORQUE_MOTOR"]
     ret.steeringPressed = abs(ret.steeringTorque) > STEER_THRESHOLD/4
     self.steerError = cp.vl["EPS_STATUS"]["LKAS_STEER_FAULT"] == 4
     self.apaFault = cp.vl["EPS_STATUS"]["APA_STEER_FAULT"] == 1
