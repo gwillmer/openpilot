@@ -54,12 +54,6 @@ TogglesPanel::TogglesPanel(QWidget *parent) : QWidget(parent) {
                                   "../assets/offroad/icon_road.png",
                                   this));
 
-  toggles.append(new ParamControl("ChryslerMangoLat",
-                                  "Chrysler Mango Lat \U0001f96d",
-                                  "needs WP setup to allow high torq",
-                                  "../assets/offroad/icon_road.png",
-                                  this));
-
   toggles.append(new ParamControl("LkasFullRangeAvailable",
                                    "Chrysler steer to 0 \U0001f96e",
                                    "needs WP setup to steer to 0 speed",

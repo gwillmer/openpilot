@@ -37,7 +37,6 @@ def manager_init():
     ("HasAcceptedTerms", "0"),
     ("OpenpilotEnabledToggle", "1"),
     ("LkasFullRangeAvailable", "1"),
-    ("ChryslerMangoLat", "1"),
     ("ChryslerMangoLong", "1"),
     ("ChryslerMadGas", "1"),
     ("DisableUpdates", "0"),
