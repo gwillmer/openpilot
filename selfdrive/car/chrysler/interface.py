@@ -27,9 +27,9 @@ class CarInterface(CarInterfaceBase):
 
     # Long tuning Params -  make individual params for cars, baseline Pacifica Hybrid
     ret.longitudinalTuning.kpBP = [0., .3, 10., 35.]
-    ret.longitudinalTuning.kpV = [1.8, .8, .3, .3]
+    ret.longitudinalTuning.kpV = [1.8, 1.2, .8, .6]
     ret.longitudinalTuning.kiBP = [0., .3, 15., 35.]
-    ret.longitudinalTuning.kiV = [0.15, .055, .05, .045]
+    ret.longitudinalTuning.kiV = [0.15, .10, .05, .045]
     ret.longitudinalTuning.deadzoneBP = [0., .5]
     ret.longitudinalTuning.deadzoneV = [0.00, 0.00]
     ret.gasMaxBP = [0., 1., 1.1, 15., 40.]
@@ -50,7 +50,7 @@ class CarInterface(CarInterfaceBase):
     ret.lateralTuning.pid.kfV = [0.00005]   # full torque for 10 deg at 80mph means 0.00007818594
     
     ret.steerActuatorDelay = 0.01
-    ret.steerRateCost = 0.35
+    ret.steerRateCost = 0.7
     ret.steerLimitTimer = 0.7
 
     if candidate in (CAR.JEEP_CHEROKEE, CAR.JEEP_CHEROKEE_2019):
@@ -117,7 +117,7 @@ class CarInterface(CarInterfaceBase):
 
     can_sends = self.CC.update(c.enabled, self.CS, c.actuators, c.cruiseControl.cancel,
                                c.hudControl.visualAlert,
-                               c.hudControl.leadRelvel,
+                               c.hudControl.leadvRel,
                                c.hudControl.leadVisible, c.hudControl.leadDistance, 
                                c.hudControl.longStarting)
 

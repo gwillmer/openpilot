@@ -169,10 +169,10 @@ class EngagementAlert(Alert):
                      audible_alert, .2, 0., 0.),
 
 class NormalPermanentAlert(Alert):
-  def __init__(self, alert_text_1, alert_text_2):
+  def __init__(self, alert_text_1: str, alert_text_2: str, duration_text: float = 0.2):
     super().__init__(alert_text_1, alert_text_2,
                      AlertStatus.normal, AlertSize.mid if len(alert_text_2) else AlertSize.small,
-                     Priority.LOWER, VisualAlert.none, AudibleAlert.none, 0., 0., .2),
+                     Priority.LOWER, VisualAlert.none, AudibleAlert.none, 0., 0., duration_text),
 
 # ********** alert callback functions **********
 
@@ -296,7 +296,7 @@ EVENTS: Dict[int, Dict[str, Union[Alert, Callable[[Any, messaging.SubMaster, boo
   EventName.carUnrecognized: {
     ET.PERMANENT: Alert(
       "Dashcam Mode",
-      "Car Unrecognized",
+      "Car Unrecognized- Please verify fingerprint with the fork owner",
       AlertStatus.normal, AlertSize.mid,
       Priority.LOWEST, VisualAlert.none, AudibleAlert.none, 0., 0., .2),
   },
@@ -680,6 +680,27 @@ EVENTS: Dict[int, Dict[str, Union[Alert, Callable[[Any, messaging.SubMaster, boo
     ET.IMMEDIATE_DISABLE: ImmediateDisableAlert("Controls Mismatch"),
   },
 
+  EventName.roadCameraError: {
+    ET.PERMANENT: NormalPermanentAlert("Road Camera Error", "",
+                                       duration_text=10.),
+  },
+
+  EventName.driverCameraError: {
+    ET.PERMANENT: NormalPermanentAlert("Driver Camera Error", "",
+                                       duration_text=10.),
+  },
+
+  EventName.wideRoadCameraError: {
+    ET.PERMANENT: NormalPermanentAlert("Wide Road Camera Error", "",
+                                       duration_text=10.),
+  },
+
+  EventName.usbError: {
+    ET.SOFT_DISABLE: SoftDisableAlert("USB Error: Reboot Your Device"),
+    ET.PERMANENT: NormalPermanentAlert("USB Error: Reboot Your Device", ""),
+    ET.NO_ENTRY: NoEntryAlert("USB Error: Reboot Your Device"),
+  },
+
   EventName.canError: {
     ET.IMMEDIATE_DISABLE: ImmediateDisableAlert("CAN Error: Check Connections"),
     ET.PERMANENT: Alert(
@@ -711,13 +732,8 @@ EVENTS: Dict[int, Dict[str, Union[Alert, Callable[[Any, messaging.SubMaster, boo
   },
 
   EventName.reverseGear: {
-    ET.PERMANENT: Alert(
-      "Reverse\nGear",
-      "",
-      AlertStatus.normal, AlertSize.full,
-      Priority.LOWEST, VisualAlert.none, AudibleAlert.none, 0., 0., .2, creation_delay=0.5),
-    ET.IMMEDIATE_DISABLE: ImmediateDisableAlert("Reverse Gear"),
-    ET.NO_ENTRY: NoEntryAlert("Reverse Gear"),
+    ET.USER_DISABLE: EngagementAlert(AudibleAlert.chimeDisengage),
+    ET.NO_ENTRY: NoEntryAlert("Shift Gear to Drive"),
   },
 
   EventName.cruiseDisabled: {

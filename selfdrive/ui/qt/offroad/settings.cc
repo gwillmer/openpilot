@@ -1,8 +1,6 @@
 #include "settings.h"
 
 #include <cassert>
-#include <iostream>
-#include <sstream>
 #include <string>
 
 #ifndef QCOM
@@ -42,6 +40,11 @@ TogglesPanel::TogglesPanel(QWidget *parent) : QWidget(parent) {
                                    "../assets/offroad/icon_road.png",
                                    this));
                                   
+  toggles.append(new ParamControl("ChryslerMadGas",
+                                  "Chrysler Mad Gas \U0001F624",
+                                  "Aggressive Gas during op long/ turn off for eco gas",
+                                  "../assets/offroad/icon_road.png",
+                                  this));
   toggles.append(new ParamControl("LkasFullRangeAvailable",
                                    "Chrysler steer to 0 \U0001f96e",
                                    "needs WP setup to steer to 0 speed",
@@ -92,9 +95,13 @@ TogglesPanel::TogglesPanel(QWidget *parent) : QWidget(parent) {
   if (Hardware::TICI()) {
     toggles.append(new ParamControl("EnableWideCamera",
                                     "Enable use of Wide Angle Camera",
-                                    "Use wide angle camera for driving and ui. Only takes effect after reboot.",
+                                    "Use wide angle camera for driving and ui.",
                                     "../assets/offroad/icon_openpilot.png",
                                     this));
+    QObject::connect(toggles.back(), &ToggleControl::toggleFlipped, [=](bool state) {
+      Params().remove("CalibrationParams");
+    });
+
     toggles.append(new ParamControl("EnableLteOnroad",
                                     "Enable LTE while onroad",
                                     "",
