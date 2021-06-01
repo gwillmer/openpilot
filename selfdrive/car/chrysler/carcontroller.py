@@ -18,6 +18,7 @@ class CarController():
   def __init__(self, dbc_name, CP, VM):
     self.apply_steer_last = 0
     self.ccframe = 0
+    self.prev_frame = -1
     self.hud_count = 0
     self.car_fingerprint = CP.carFingerprint
     self.gone_fast_yet = False
@@ -153,8 +154,16 @@ class CarController():
 
     if self.ccframe % 25 == 0:
       self.hud_count += 1
+    
+    
+    frame = CS.lkas_counter
+    if self.prev_frame != frame:
+      self.prev_frame = frame
+      self.last_frame_change = self.ccframe
+    else:
+      frame = (CS.lkas_counter + (self.ccframe - self.last_frame_change)) % 16  # Predict the next frame
 
-    new_msg = create_lkas_command(self.packer, int(apply_steer), lkas_active, CS.lkas_counter)
+    new_msg = create_lkas_command(self.packer, int(apply_steer), lkas_active, frame)
     can_sends.append(new_msg)
 
 
