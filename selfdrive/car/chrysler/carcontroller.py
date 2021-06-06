@@ -8,6 +8,7 @@ from selfdrive.config import Conversions as CV
 from selfdrive.controls.lib.drive_helpers import V_CRUISE_MIN, V_CRUISE_MIN_IMPERIAL
 from common.cached_params import CachedParams
 from common.params import Params
+from common.op_params import opParams
 from cereal import car
 import cereal.messaging as messaging
 ButtonType = car.CarState.ButtonEvent.Type
@@ -33,8 +34,10 @@ class CarController():
 
     self.params = Params()
     self.cachedParams = CachedParams()
+    self.opParams = opParams()
     self.disable_auto_resume = self.params.get('jvePilot.settings.autoResume', encoding='utf8') != "1"
     self.autoFollowDistanceLock = None
+    self.min_steer_check = self.opParams.get('steer.checkMinimum')
     self.minAccSetting = V_CRUISE_MIN_MS if self.params.get_bool("IsMetric") else V_CRUISE_MIN_IMPERIAL_MS
     self.round_to_unit = CV.MS_TO_KPH if self.params.get_bool("IsMetric") else CV.MS_TO_MPH
 
@@ -109,7 +112,7 @@ class CarController():
       if (CS.lkas_car_model != -1):
         new_msg = create_lkas_hud(
           self.packer, CS.out.gearShifter, lkas_active, hud_alert,
-          self.hud_count, CS.lkas_car_model)
+          self.hud_count, CS.lkas_car_model, 0 if self.min_steer_check else 1)
         can_sends.append(new_msg)
         self.hud_count += 1
 
