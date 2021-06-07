@@ -19,7 +19,9 @@ class CarState(CarStateBase):
   def update(self, cp, cp_cam):
 
     ret = car.CarState.new_message()
-
+    
+    self.frame = int(cp.vl["EPS_STATUS"]["COUNTER"])
+    
     ret.doorOpen = any([cp.vl["DOORS"]['DOOR_OPEN_FL'],
                         cp.vl["DOORS"]['DOOR_OPEN_FR'],
                         cp.vl["DOORS"]['DOOR_OPEN_RL'],
