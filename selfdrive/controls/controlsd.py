@@ -41,7 +41,7 @@ Desire = log.LateralPlan.Desire
 LaneChangeState = log.LateralPlan.LaneChangeState
 LaneChangeDirection = log.LateralPlan.LaneChangeDirection
 EventName = car.CarEvent.EventName
-
+long_ctrl_state = log.ControlsState.LongControlState
 
 class Controls:
   def __init__(self, sm=None, pm=None, can_sock=None):
@@ -450,9 +450,12 @@ class Controls:
       self.LaC.reset()
       self.LoC.reset(v_pid=CS.vEgo)
 
+    d_rel = self.sm['radarState'].leadOne.dRel
+    v_rel = self.sm['radarState'].leadOne.vRel
+    has_lead = self.sm['longitudinalPlan'].hasLead
     if not self.joystick_mode:
       # Gas/Brake PID loop
-      actuators.gas, actuators.brake, self.v_target, self.a_target = self.LoC.update(self.active, CS, self.CP, long_plan)
+      actuators.gas, actuators.brake, self.v_target, self.a_target = self.LoC.update(self.active, CS, self.CP, long_plan, d_rel, v_rel, has_lead)
 
       # Steering PID loop and lateral MPC
       desired_curvature, desired_curvature_rate = get_lag_adjusted_curvature(self.CP, CS.vEgo,
@@ -523,7 +526,16 @@ class Controls:
     CC.hudControl.setSpeed = float(self.v_cruise_kph * CV.KPH_TO_MS)
     CC.hudControl.speedVisible = self.enabled
     CC.hudControl.lanesVisible = self.enabled
+    CC.hudControl.leadvRel = self.sm['radarState'].leadOne.vRel
     CC.hudControl.leadVisible = self.sm['longitudinalPlan'].hasLead
+    CC.hudControl.leadDistance = self.sm['radarState'].leadOne.dRel
+    # controlsState
+    dat = messaging.new_message('controlsState')
+    dat.valid = CS.canValid
+    controlsState = dat.controlsState
+    controlsState.longControlState = self.LoC.long_control_state
+    CC.hudControl.longStopping = controlsState.longControlState == long_ctrl_state.stopping
+    CC.hudControl.longStarting = controlsState.longControlState == long_ctrl_state.starting
 
     right_lane_visible = self.sm['lateralPlan'].rProb > 0.5
     left_lane_visible = self.sm['lateralPlan'].lProb > 0.5
@@ -566,10 +578,6 @@ class Controls:
     steer_angle_without_offset = math.radians(CS.steeringAngleDeg - params.angleOffsetAverageDeg)
     curvature = -self.VM.calc_curvature(steer_angle_without_offset, CS.vEgo)
 
-    # controlsState
-    dat = messaging.new_message('controlsState')
-    dat.valid = CS.canValid
-    controlsState = dat.controlsState
     controlsState.alertText1 = self.AM.alert_text_1
     controlsState.alertText2 = self.AM.alert_text_2
     controlsState.alertSize = self.AM.alert_size
@@ -585,7 +593,6 @@ class Controls:
     controlsState.curvature = curvature
     controlsState.state = self.state
     controlsState.engageable = not self.events.any(ET.NO_ENTRY)
-    controlsState.longControlState = self.LoC.long_control_state
     controlsState.vPid = float(self.LoC.v_pid)
     controlsState.vCruise = float(self.v_cruise_kph)
     controlsState.upAccelCmd = float(self.LoC.pid.p)

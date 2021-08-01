@@ -108,6 +108,7 @@ struct CarEvent @0x9b1657f34caf3ad3 {
     driverCameraError @101;
     wideRoadCameraError @102;
     localizerMalfunction @103;
+    hightorqsteerUnavailable @ 105;
 
     driverMonitorLowAccDEPRECATED @68;
     radarCanErrorDEPRECATED @15;
@@ -153,6 +154,7 @@ struct CarState {
   # brake pedal, 0.0-1.0
   brake @5 :Float32;      # this is user pedal only
   brakePressed @6 :Bool;  # this is user pedal only
+  brakeLights @19 :Bool;
 
   # steering wheel
   steeringAngleDeg @7 :Float32;
@@ -166,6 +168,8 @@ struct CarState {
   stockAeb @30 :Bool;
   stockFcw @31 :Bool;
   espDisabled @32 :Bool;
+  hightorqUnavailable @37 :Bool;
+  accgasOverride @38 :Bool;
 
   # cruise state
   cruiseState @10 :CruiseState;
@@ -246,7 +250,6 @@ struct CarState {
   }
 
   errorsDEPRECATED @0 :List(CarEvent.EventName);
-  brakeLightsDEPRECATED @19 :Bool;
 }
 
 # ******* radar state @ 20hz *******
@@ -322,6 +325,10 @@ struct CarControl {
     leftLaneVisible @7: Bool;
     rightLaneDepart @8: Bool;
     leftLaneDepart @9: Bool;
+    leadDistance @10: Float32;
+    longStopping @11: Bool;
+    longStarting @12: Bool;
+    leadvRel @13: Float32;
 
     enum VisualAlert {
       # these are the choices from the Honda
@@ -363,10 +370,11 @@ struct CarParams {
 
   enableGasInterceptor @2 :Bool;
   pcmCruise @3 :Bool;        # is openpilot's state tied to the PCM's cruise state?
-  enableDsu @5 :Bool;        # driving support unit
-  enableApgs @6 :Bool;       # advanced parking guidance system
-  enableBsm @56 :Bool;       # blind spot monitoring
-  hasStockCamera @57 :Bool;  # factory LKAS/LDW camera is present
+  enableDsu @5 :Bool; # driving support unit
+  enableApgs @6 :Bool; # advanced parking guidance system
+  enableBsm @56 :Bool; # blind spot monitoring
+  hasStockCamera @57 :Bool; # factory LKAS/LDW camera is present
+  enablehybridEcu @58 :Bool; #hydrid ecu
 
   minEnableSpeed @7 :Float32;
   minSteerSpeed @8 :Float32;
@@ -439,6 +447,10 @@ struct CarParams {
     kiBP @2 :List(Float32);
     kiV @3 :List(Float32);
     kf @4 :Float32;
+    kfV @5 :List(Float32);
+    kfBP @6 :List(Float32);
+    kdV @7 :List(Float32);
+    kdBP @8 :List(Float32);
   }
 
   struct LongitudinalPIDTuning {
@@ -448,6 +460,8 @@ struct CarParams {
     kiV @3 :List(Float32);
     deadzoneBP @4 :List(Float32);
     deadzoneV @5 :List(Float32);
+    kfBP @6 :List(Float32);
+    kfV @7 :List(Float32);
   }
 
   struct LateralINDITuning {
