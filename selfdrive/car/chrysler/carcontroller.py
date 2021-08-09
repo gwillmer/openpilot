@@ -40,6 +40,9 @@ class CarController():
     self.autoFollowDistanceLock = None
     self.min_steer_check = self.opParams.get('steer.checkMinimum')
     self.minAccSetting = V_CRUISE_MIN_MS if self.params.get_bool("IsMetric") else V_CRUISE_MIN_IMPERIAL_MS
+    self.round_to_unit = CV.MS_TO_KPH if self.params.get_bool("IsMetric") else CV.MS_TO_MPH
+
+    self.cachedParams = CachedParams()
     self.autoFollowDistanceLock = None
 
   def update(self, enabled, CS, actuators, pcm_cancel_cmd, hud_alert, gas_resume_speed, c):
