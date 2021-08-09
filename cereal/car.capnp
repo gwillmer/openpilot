@@ -24,6 +24,8 @@ struct JvePilotState {
     vTargetFuture @0 :Float32;
     autoFollow @1 :Bool;
     accEco @2 :UInt8;
+    useLaneLines @3 :Bool;
+    vMaxCruise @4 :Float32;
   }
 }
 
@@ -70,8 +72,8 @@ struct CarEvent @0x9b1657f34caf3ad3 {
     manualRestart @30;
     lowSpeedLockout @31;
     plannerError @32;
-    debugAlert @34;
-    steerTempUnavailableUserOverride @35;
+    joystickDebug @34;
+    steerTempUnavailableSilent @35;
     resumeRequired @36;
     preDriverDistracted @37;
     promptDriverDistracted @38;
@@ -96,7 +98,6 @@ struct CarEvent @0x9b1657f34caf3ad3 {
     stockAeb @64;
     ldw @65;
     carUnrecognized @66;
-    driverMonitorLowAcc @68;
     invalidLkasSetting @69;
     speedTooHigh @70;
     laneChangeBlocked @71;
@@ -108,6 +109,7 @@ struct CarEvent @0x9b1657f34caf3ad3 {
     startupNoControl @77;
     startupMaster @78;
     startupFuzzyFingerprint @97;
+    startupNoFw @104;
     fcw @79;
     steerSaturated @80;
     belowEngageSpeed @84;
@@ -122,8 +124,12 @@ struct CarEvent @0x9b1657f34caf3ad3 {
     dashcamMode @96;
     controlsInitializing @98;
     usbError @99;
-    accBrakeHold @100;
+    roadCameraError @100;
+    driverCameraError @101;
+    wideRoadCameraError @102;
+    localizerMalfunction @103;
 
+    driverMonitorLowAccDEPRECATED @68;
     radarCanErrorDEPRECATED @15;
     radarCommIssueDEPRECATED @67;
     gasUnavailableDEPRECATED @3;
@@ -142,7 +148,7 @@ struct CarEvent @0x9b1657f34caf3ad3 {
     focusRecoverActiveDEPRECATED @86;
     neosUpdateRequiredDEPRECATED @88;
     modelLagWarningDEPRECATED @93;
-    startupOneplusDEPRECATED @82;
+    accBrakeHold @82; # repurposed for jvePilot
   }
 }
 
@@ -167,7 +173,6 @@ struct CarState {
   # brake pedal, 0.0-1.0
   brake @5 :Float32;      # this is user pedal only
   brakePressed @6 :Bool;  # this is user pedal only
-  brakeLights @19 :Bool;
 
   # steering wheel
   steeringAngleDeg @7 :Float32;
@@ -260,12 +265,14 @@ struct CarState {
       gapAdjustCruise @11;
       followInc @12;
       followDec @13;
+      lkasToggle @14;
     }
   }
 
   jvePilotCarState @37: JvePilotState.CarState;
 
   errorsDEPRECATED @0 :List(CarEvent.EventName);
+  brakeLightsDEPRECATED @19 :Bool;
 }
 
 # ******* radar state @ 20hz *******
@@ -383,11 +390,11 @@ struct CarParams {
   fuzzyFingerprint @55 :Bool;
 
   enableGasInterceptor @2 :Bool;
-  enableCruise @3 :Bool;
-  enableCamera @4 :Bool;
-  enableDsu @5 :Bool; # driving support unit
-  enableApgs @6 :Bool; # advanced parking guidance system
-  enableBsm @56 :Bool; # blind spot monitoring
+  pcmCruise @3 :Bool;        # is openpilot's state tied to the PCM's cruise state?
+  enableDsu @5 :Bool;        # driving support unit
+  enableApgs @6 :Bool;       # advanced parking guidance system
+  enableBsm @56 :Bool;       # blind spot monitoring
+  hasStockCamera @57 :Bool;  # factory LKAS/LDW camera is present
 
   minEnableSpeed @7 :Float32;
   minSteerSpeed @8 :Float32;
@@ -539,6 +546,7 @@ struct CarParams {
     automatic @1;  # Traditional auto, including DSG
     manual @2;  # True "stick shift" only
     direct @3;  # Electric vehicle or other direct drive
+    cvt @4;
   }
 
   struct CarFw {
@@ -583,5 +591,6 @@ struct CarParams {
     gateway @1;    # Integration at vehicle's CAN gateway
   }
 
-  isPandaBlackDEPRECATED @39: Bool;
+  enableCameraDEPRECATED @4 :Bool;
+  pcmCruiseSpeed @39: Bool; # repurposed for jvePilot
 }

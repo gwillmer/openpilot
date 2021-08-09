@@ -12,15 +12,17 @@ from common.basedir import BASEDIR
 from common.params import Params, ParamKeyType
 from common.text_window import TextWindow
 from selfdrive.boardd.set_time import set_time
-from selfdrive.hardware import HARDWARE, PC, TICI
+from selfdrive.hardware import HARDWARE, PC
 from selfdrive.manager.helpers import unblock_stdout
 from selfdrive.manager.process import ensure_running
 from selfdrive.manager.process_config import managed_processes
 from selfdrive.athena.registration import register, UNREGISTERED_DONGLE_ID
 from selfdrive.swaglog import cloudlog, add_file_handler
 from selfdrive.version import dirty, get_git_commit, version, origin, branch, commit, \
-  terms_version, training_version, comma_remote, \
-  get_git_branch, get_git_remote
+                              terms_version, training_version, comma_remote, \
+                              get_git_branch, get_git_remote
+
+sys.path.append(os.path.join(BASEDIR, "pyextra"))
 
 def manager_init():
 
@@ -55,12 +57,10 @@ def manager_init():
 
     ("CompletedTrainingVersion", "0"),
     ("HasAcceptedTerms", "0"),
-    ("LastUpdateTime", datetime.datetime.utcnow().isoformat().encode('utf8')),
     ("OpenpilotEnabledToggle", "1"),
   ]
-
-  if TICI:
-    default_params.append(("IsUploadRawEnabled", "1"))
+  if not PC:
+    default_params.append(("LastUpdateTime", datetime.datetime.utcnow().isoformat().encode('utf8')))
 
   if params.get_bool("RecordFrontLock"):
     params.put_bool("RecordFront", True)
@@ -139,7 +139,7 @@ def manager_thread():
   params = Params()
 
   ignore = []
-  if params.get("DongleId") == UNREGISTERED_DONGLE_ID:
+  if params.get("DongleId", encoding='utf8') == UNREGISTERED_DONGLE_ID:
     ignore += ["manage_athenad", "uploader"]
   if os.getenv("NOBOARD") is not None:
     ignore.append("pandad")

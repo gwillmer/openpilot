@@ -1,8 +1,8 @@
 #pragma once
 
-#include <stdint.h>
-#include <stdbool.h>
 #include <pthread.h>
+
+#include <cstdint>
 
 #include <media/cam_req_mgr.h>
 
@@ -31,6 +31,9 @@ typedef struct CameraState {
   int exposure_time_min;
   int exposure_time_max;
   float ef_filtered;
+
+  float measured_grey_fraction;
+  float target_grey_fraction;
 
   unique_fd sensor_fd;
   unique_fd csiphy_fd;

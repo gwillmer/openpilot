@@ -3,7 +3,6 @@ from cereal import car
 from selfdrive.car.chrysler.values import CAR
 from selfdrive.car import STD_CARGO_KG, scale_rot_inertia, scale_tire_stiffness, gen_empty_fingerprint
 from selfdrive.car.interfaces import CarInterfaceBase
-from selfdrive.config import Conversions as CV
 from common.cached_params import CachedParams
 from common.op_params import opParams
 
@@ -63,8 +62,9 @@ class CarInterface(CarInterfaceBase):
     # mass and CG position, so all cars will have approximately similar dyn behaviors
     ret.tireStiffnessFront, ret.tireStiffnessRear = scale_tire_stiffness(ret.mass, ret.wheelbase, ret.centerToFront)
 
-    ret.enableCamera = True
-    ret.openpilotLongitudinalControl = ret.enableCamera  # kind of...
+    ret.gasMaxV = [1.]  # we want full speed
+    ret.openpilotLongitudinalControl = True  # kind of...
+    ret.pcmCruiseSpeed = False  # Let jvePilot control the pcm cruise speed
 
     ret.enableBsm |= 720 in fingerprint[0]
 
@@ -114,6 +114,6 @@ class CarInterface(CarInterfaceBase):
       return []  # if we haven't seen a frame 220, then do not update.
 
     can_sends = self.CC.update(c.enabled, self.CS, c.actuators, c.cruiseControl.cancel, c.hudControl.visualAlert,
-                               GAS_RESUME_SPEED, c.jvePilotState)
+                               GAS_RESUME_SPEED, c)
 
     return can_sends

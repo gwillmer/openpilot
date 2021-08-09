@@ -7,6 +7,9 @@ from common.basedir import BASEDIR
 from selfdrive.swaglog import cloudlog
 
 
+TESTED_BRANCHES = ['jvePilot-release', 'origin/jvePilot-release']
+
+
 def run_cmd(cmd: List[str]) -> str:
     return subprocess.check_output(cmd, encoding='utf8').strip()
 
@@ -39,9 +42,12 @@ def get_git_remote(default: Optional[str] = None) -> Optional[str]:
     return run_cmd_default(["git", "config", "--get", "remote.origin.url"], default=default)
 
 
-with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "common", "version.h")) as _versionf:
-  version = _versionf.read().split('"')[1]
+def get_version():
+  with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "common", "version.h")) as _versionf:
+    version = _versionf.read().split('"')[1]
+  return version
 
+version = get_version()
 prebuilt = os.path.exists(os.path.join(BASEDIR, 'prebuilt'))
 
 training_version: bytes = b"0.2.0"
@@ -57,7 +63,7 @@ commit = get_git_commit()
 if (origin is not None) and (branch is not None):
   try:
     comma_remote = origin.startswith('git@github.com:j-vanetten') or origin.startswith('https://github.com/j-vanetten')
-    tested_branch = get_git_branch() in ['jvePilot-release', 'origin/jvePilot-release']
+    tested_branch = get_git_branch() in TESTED_BRANCHES
 
     dirty = False
 
@@ -71,7 +77,7 @@ if (origin is not None) and (branch is not None):
       dirty = (subprocess.call(["git", "diff-index", "--quiet", branch, "--"]) != 0)
 
       # Log dirty files
-      if dirty and (comma_remote):
+      if dirty and comma_remote:
         try:
           dirty_files = run_cmd(["git", "diff-index", branch, "--"])
           cloudlog.event("dirty jvePilot branch", version=version, dirty=dirty, origin=origin, branch=branch,
