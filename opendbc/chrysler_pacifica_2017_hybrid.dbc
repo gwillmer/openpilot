@@ -371,7 +371,20 @@ BO_ 512 NEW_MSG_200: 8 XXX
  SG_ COUNTER : 51|4@0+ (1,0) [0|15] "" XXX
  SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
 
-
+BO_ 504 TESTING_ACC_2: 8 XXX
+ SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
+ SG_ COUNTER : 55|4@0+ (1,0) [0|15] "" XXX
+ SG_ ACC_STOP : 5|1@0+ (1,0) [0|1] "" XXX
+ SG_ ACC_GO : 6|1@0+ (1,0) [0|1] "" XXX
+ SG_ ACC_ACCEL_CMD_GR : 19|12@0+ (1,0) [0|255] "" XXX
+ SG_ ACC_AVAILABLE : 20|1@0+ (1,0) [0|1] "" XXX
+ SG_ ACC_ENABLED : 21|1@0+ (1,0) [0|1] "" XXX
+ SG_ BRAKE_WARN : 39|1@0+ (1,0) [0|1] "" XXX
+ SG_ COLLISION_BRK_PREP : 48|1@0+ (1,0) [0|1] "" XXX
+ SG_ ACC_BRK_PREP : 49|1@0+ (1,0) [0|1] "" XXX
+ SG_ COMMAND_TYPE_2 : 50|1@0+ (1,0) [0|1] "" XXX
+ SG_ COMMAND_TYPE : 38|3@0+ (1,0) [0|7] "" XXX
+ SG_ ACC_ACCEL_CMD : 3|12@0+ (1,0) [0|255] "" XXX
 
 
 CM_ SG_ 258 UNKNOWN_STEERING "never goes above 4. see if human-applied torque";

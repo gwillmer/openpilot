@@ -36,9 +36,8 @@ class CarController():
 
     self.params = Params()
     self.opParams = opParams()
-    self.auto_resume = self.params.get_bool('jvePilot.settings.autoResume')
-    self.autoFollowDistanceLock = None
     self.min_steer_check = self.opParams.get('steer.checkMinimum')
+    self.auto_resume = self.params.get_bool('jvePilot.settings.autoResume')
     self.minAccSetting = V_CRUISE_MIN_MS if self.params.get_bool("IsMetric") else V_CRUISE_MIN_IMPERIAL_MS
     self.round_to_unit = CV.MS_TO_KPH if self.params.get_bool("IsMetric") else CV.MS_TO_MPH
 
