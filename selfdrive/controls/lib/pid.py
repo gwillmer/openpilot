@@ -12,7 +12,7 @@ def apply_deadzone(error, deadzone):
 
 
 class PIDLatController():
-  def __init__(self, k_p, k_i, k_f, k_d, pos_limit=None, neg_limit=None, rate=100, sat_limit=0.8, convert=None):
+  def __init__(self, k_p, k_i, k_f, k_d, pos_limit=None, neg_limit=None, rate=100, sat_limit=0.8):
     self._k_p = k_p  # proportional gain
     self._k_i = k_i  # integral gain
     self._k_f = k_f  # feedforward gain
@@ -25,7 +25,6 @@ class PIDLatController():
     self.i_unwind_rate = 0.3 / rate
     self.i_rate = 1.0 / rate
     self.sat_limit = sat_limit
-    self.convert = convert
 
     self.reset()
 
@@ -85,9 +84,6 @@ class PIDLatController():
       i = self.i + error * self.k_i * self.i_rate
       control = self.p + self.f + i
 
-      if self.convert is not None:
-        control = self.convert(control, speed=self.speed)
-
       # Update when changing i will move the control away from the limits
       # or when i will move towards the sign of the error
       if ((error >= 0 and (control <= self.pos_limit or i < 0.0)) or
@@ -96,8 +92,6 @@ class PIDLatController():
         self.i = i
 
     control = self.p + self.f + self.i + self.d
-    if self.convert is not None:
-      control = self.convert(control, speed=self.speed)
 
     self.saturated = self._check_saturation(control, check_saturation, error)
 
@@ -109,7 +103,7 @@ class PIDLatController():
     return self.control
 
 class PIDLongController():
-  def __init__(self, k_p, k_i, k_f, k_d, pos_limit=None, neg_limit=None, rate=100, sat_limit=0.8, convert=None):
+  def __init__(self, k_p, k_i, k_f, k_d, pos_limit=None, neg_limit=None, rate=100, sat_limit=0.8):
     self._k_p = k_p  # proportional gain
     self._k_i = k_i  # integral gain
     self._k_f = k_f  # feedforward gain
@@ -122,7 +116,6 @@ class PIDLongController():
     self.i_unwind_rate = 0.3 / rate
     self.i_rate = 1.0 / rate
     self.sat_limit = sat_limit
-    self.convert = convert
 
     self.reset()
 
@@ -178,9 +171,6 @@ class PIDLongController():
       i = self.i + error * self.k_i * self.i_rate
       control = self.p + self.f + i
 
-      if self.convert is not None:
-        control = self.convert(control, speed=self.speed)
-
       # Update when changing i will move the control away from the limits
       # or when i will move towards the sign of the error
       if ((error >= 0 and (control <= self.pos_limit or i < 0.0)) or
@@ -189,8 +179,6 @@ class PIDLongController():
         self.i = i
 
     control = self.p + self.f + self.i + self.d
-    if self.convert is not None:
-      control = self.convert(control, speed=self.speed)
 
     self.saturated = self._check_saturation(control, check_saturation, error)
 
