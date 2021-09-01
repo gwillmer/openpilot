@@ -28,10 +28,10 @@ class CarInterface(CarInterfaceBase):
     ret.longitudinalTuning.kiV = [0.006, .005, .005, .0045]
     ret.longitudinalTuning.deadzoneBP = [0., .5]
     ret.longitudinalTuning.deadzoneV = [0.00, 0.00]
-    ret.accelMaxBP = [0., 1., 1.1, 15., 40.]
-    ret.accelMaxV = [2., 2., 2., 2., 2.]
-    ret.decelMaxBP = [0., 5., 5.1]
-    ret.decelMaxV = [3.8, 3.8, 3.8]  # safety limits to stop unintended deceleration
+    #ret.accelMaxBP = [0., 1., 1.1, 15., 40.]
+    #ret.accelMaxV = [2., 2., 2., 2., 2.]
+    #ret.decelMaxBP = [0., 5., 5.1]
+    #ret.decelMaxV = [3.8, 3.8, 3.8]  # safety limits to stop unintended deceleration
     ret.longitudinalTuning.kfBP = [0., 5., 10., 20., 30.]
     ret.longitudinalTuning.kfV = [1., 1., 1., 1., .95]
     ret.startAccel = 0.5
