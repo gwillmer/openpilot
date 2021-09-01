@@ -36,8 +36,8 @@ class CarInterface(CarInterfaceBase):
     ret.longitudinalTuning.kfV = [1., 1., 1., 1., .95]
     ret.startAccel = 0.5
     ret.minSpeedCan = 0.3
-    ret.stoppingBrakeRate = 0.2 # brake_travel/s while trying to stop
-    ret.startingBrakeRate = 2.0 # brake_travel/s while releasing on restart
+    #ret.stoppingBrakeRate = 0.2 # brake_travel/s while trying to stop
+    #ret.startingBrakeRate = 2.0 # brake_travel/s while releasing on restart
     ret.stoppingControl = True
 
     if not Params().get_bool('ChryslerMangoLat'):
