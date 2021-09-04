@@ -165,10 +165,6 @@ class PIDLongController():
     self.speed = speed
 
     error = float(apply_deadzone(setpoint - measurement, deadzone))
-    if error <= 0: # brake controller is very accurate, only needs feed forward
-       self.k_p = 0.
-       self.k_i = self.k_i/10
-
     self.p = error * self.k_p
     self.f = feedforward * self.k_f
 
@@ -184,8 +180,11 @@ class PIDLongController():
           (error <= 0 and (control >= self.neg_limit or i > 0.0))) and \
          not freeze_integrator:
         self.i = i
-
-    control = self.p + self.f + self.i
+    
+    if error <= 0: # brake controller is very accurate, only needs feed forward
+       control = self.f + self.i/10
+    else:
+       control = self.p + self.f + self.i
     self.saturated = self._check_saturation(control, check_saturation, error)
 
     self.control = clip(control, self.neg_limit, self.pos_limit)
