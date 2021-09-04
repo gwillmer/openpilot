@@ -10,8 +10,11 @@ from selfdrive.swaglog import cloudlog
 
 MPC_T = list(np.arange(0,1.,.2)) + list(np.arange(1.,10.6,.6))
 
-Bp = [-30.,  -3., -2., -0.01]
-BpTR = [0.7, 1.0, 1.5,  2.5]
+Bpx = [0.75, 1., 1.5]
+BpTR = [1.8, 1.5, 0.7]
+
+BpV = [0., .278, 3., 8., 15., 30]
+BpXTR = [4., 4., 6., 16., 20., 25.]
 
 class LeadMpc():
   def __init__(self, mpc_id):
@@ -78,11 +81,12 @@ class LeadMpc():
       self.prev_lead_x = x_lead
       self.cur_state[0].x_l = x_lead
       self.cur_state[0].v_l = v_lead
-      calc = x_lead/min(-0.01,(v_lead - v_ego))
-      if ((v_lead - v_ego) > 0):
+      if ((v_lead - v_ego) > 0.5):
         TR = 0.7 
       else:
-        TR =  interp(calc, Bp, BpTR)
+        TRx = interp(v_ego, BpV, BpXTR)
+        ratio = x_lead/TRx
+        TR = interp(ratio, Bpx, BpTR)
     else:
       self.prev_lead_status = False
       # Fake a fast lead car, so mpc keeps running
