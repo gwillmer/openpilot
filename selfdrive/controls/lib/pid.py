@@ -1,4 +1,6 @@
 import numpy as np
+from numbers import Number
+
 from common.numpy_fast import clip, interp
 
 def apply_deadzone(error, deadzone):
@@ -16,7 +18,12 @@ class PIDLatController():
     self._k_p = k_p  # proportional gain
     self._k_i = k_i  # integral gain
     self._k_f = k_f  # feedforward gain
-    self._k_d = k_d  # feedforward gain
+    self._k_d = k_d  # Differential gain
+
+    if isinstance(self._k_p, Number):
+      self._k_p = [[0], [self._k_p]]
+    if isinstance(self._k_i, Number):
+      self._k_i = [[0], [self._k_i]]
 
     self.pos_limit = pos_limit
     self.neg_limit = neg_limit
@@ -103,11 +110,14 @@ class PIDLatController():
     return self.control
 
 class PIDLongController():
-  def __init__(self, k_p, k_i, k_f, k_d, pos_limit=None, neg_limit=None, rate=100, sat_limit=0.8):
+  def __init__(self, k_p, k_i, k_f, pos_limit=None, neg_limit=None, rate=100, sat_limit=0.8):
     self._k_p = k_p  # proportional gain
     self._k_i = k_i  # integral gain
     self._k_f = k_f  # feedforward gain
-    self._k_d = k_d  # feedforward gain
+    if isinstance(self._k_p, Number):
+      self._k_p = [[0], [self._k_p]]
+    if isinstance(self._k_i, Number):
+      self._k_i = [[0], [self._k_i]]
 
     self.pos_limit = pos_limit
     self.neg_limit = neg_limit
@@ -131,10 +141,6 @@ class PIDLongController():
   def k_f(self):
     return interp(self.speed, self._k_f[0], self._k_f[1])
 
-  @property
-  def k_d(self):
-    return interp(self.speed, self._k_d[0], self._k_d[1])
-
   def _check_saturation(self, control, check_saturation, error):
     saturated = (control < self.neg_limit) or (control > self.pos_limit)
 
@@ -151,15 +157,15 @@ class PIDLongController():
     self.p = 0.0
     self.i = 0.0
     self.f = 0.0
-    self.d = 0.0
     self.sat_count = 0.0
     self.saturated = False
     self.control = 0
-    self.last_setpoint = 0.0
-    self.last_error = 0.0
 
   def update(self, setpoint, measurement, speed=0.0, check_saturation=True, override=False, feedforward=0., deadzone=0., freeze_integrator=False, reset=False):
     self.speed = speed
+    if error <= 0: # brake controller is very accurate, only needs feed forward
+       self.k_p = 0.
+       self.k_i = self.k_i/10
 
     error = float(apply_deadzone(setpoint - measurement, deadzone))
     self.p = error * self.k_p
@@ -178,12 +184,8 @@ class PIDLongController():
          not freeze_integrator:
         self.i = i
 
-    control = self.p + self.f + self.i + self.d
-
+    control = self.p + self.f + self.i
     self.saturated = self._check_saturation(control, check_saturation, error)
-
-    self.last_setpoint = float(setpoint)
-    self.last_error = float(error)
 
     self.control = clip(control, self.neg_limit, self.pos_limit)
 

@@ -17,6 +17,9 @@ EventName = car.CarEvent.EventName
 # WARNING: this value was determined based on the model's training distribution,
 #          model predictions above this speed can be unpredictable
 MAX_CTRL_SPEED = (V_CRUISE_MAX + 4) * CV.KPH_TO_MS  # 135 + 4 = 86 mph
+ACCEL_MAX = 2.0
+ACCEL_MIN = -4.0
+
 
 # generic car and radar interfaces
 
@@ -40,6 +43,10 @@ class CarInterfaceBase():
     self.CC = None
     if CarController is not None:
       self.CC = CarController(self.cp.dbc_name, CP, self.VM)
+
+  @staticmethod
+  def get_pid_accel_limits(current_speed, cruise_speed):
+    return ACCEL_MIN, ACCEL_MAX
 
   @staticmethod
   def calc_accel_override(a_ego, a_target, v_ego, v_target):
@@ -71,8 +78,8 @@ class CarInterfaceBase():
     ret.openpilotLongitudinalControl = False
     ret.startAccel = 0.0
     ret.minSpeedCan = 0.3
-    ret.stoppingDecelRate = 0.2 # brake_travel/s while trying to stop
-    ret.startingAccelRate = 0.8 # brake_travel/s while releasing on restart
+    ret.stoppingDecelRate = 0.8 # brake_travel/s while trying to stop
+    ret.startingAccelRate = 3.2 # brake_travel/s while releasing on restart
     ret.stoppingControl = True
     ret.longitudinalTuning.deadzoneBP = [0.]
     ret.longitudinalTuning.deadzoneV = [0.]

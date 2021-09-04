@@ -190,7 +190,7 @@ class Controls:
       return
 
     # Create events for battery, temperature, disk space, and memory
-    if self.sm['deviceState'].batteryPercent < 1 and self.sm['deviceState'].chargingError:
+    if EON and self.sm['deviceState'].batteryPercent < 1 and self.sm['deviceState'].chargingError:
       # at zero percent battery, while discharging, OP should not allowed
       self.events.add(EventName.lowBattery)
     if self.sm['deviceState'].thermalStatus >= ThermalStatus.red:
@@ -332,7 +332,7 @@ class Controls:
     self.sm.update(0)
 
     all_valid = CS.canValid and self.sm.all_alive_and_valid()
-    if not self.initialized and (all_valid or self.sm.frame * DT_CTRL > 3.5):
+    if not self.initialized and (all_valid or self.sm.frame * DT_CTRL > 3.5 or SIMULATION):
       self.CI.init(self.CP, self.can_sock, self.pm.sock['sendcan'])
       self.initialized = True
       Params().put_bool("ControlsReady", True)
@@ -463,7 +463,8 @@ class Controls:
     has_lead = self.sm['longitudinalPlan'].hasLead
     if not self.joystick_mode:
       # accel PID loop
-      actuators.accel, self.v_target, self.a_target = self.LoC.update(self.active, CS, self.CP, long_plan, d_rel, v_rel, has_lead)
+      pid_accel_limits = self.CI.get_pid_accel_limits(CS.vEgo, self.v_cruise_kph * CV.KPH_TO_MS)
+      actuators.accel, self.v_target, self.a_target = self.LoC.update(self.active, CS, self.CP, long_plan, pid_accel_limits, d_rel, v_rel, has_lead)
 
       # Steering PID loop and lateral MPC
       desired_curvature, desired_curvature_rate = get_lag_adjusted_curvature(self.CP, CS.vEgo,
@@ -475,7 +476,7 @@ class Controls:
     else:
       lac_log = log.ControlsState.LateralDebugState.new_message()
       if self.sm.rcv_frame['testJoystick'] > 0 and self.active:
-        actuators.accel = clip(self.sm['testJoystick'].axes[0], -1, 1)
+        actuators.accel = 4.0*clip(self.sm['testJoystick'].axes[0], -1, 1)
 
         steer = clip(self.sm['testJoystick'].axes[1], -1, 1)
         # max angle is 45 for angle-based cars
@@ -530,7 +531,7 @@ class Controls:
     # TODO remove car specific stuff in controls
     # Some override values for Honda
     # brake discount removes a sharp nonlinearity
-    brake_discount = (1.0 - clip(actuators.accel * 3., 0.0, 1.0))
+    brake_discount = (1.0 - clip(-actuators.accel * (3.0/4.0), 0.0, 1.0))
     speed_override = max(0.0, (self.LoC.v_pid + CS.cruiseState.speedOffset) * brake_discount)
     CC.cruiseControl.speedOverride = float(speed_override if self.CP.pcmCruise else 0.0)
     CC.cruiseControl.accelOverride = float(self.CI.calc_accel_override(CS.aEgo, self.a_target,

@@ -150,6 +150,7 @@ std::unordered_map<std::string, uint32_t> keys = {
     {"GitRemote", PERSISTENT},
     {"GithubSshKeys", PERSISTENT},
     {"GithubUsername", PERSISTENT},
+    {"GsmRoaming", PERSISTENT},
     {"HardwareSerial", PERSISTENT},
     {"HasAcceptedTerms", PERSISTENT},
     {"IsDriverViewEnabled", CLEAR_ON_MANAGER_START},
@@ -204,10 +205,6 @@ std::unordered_map<std::string, uint32_t> keys = {
     {"Offroad_NvmeMissing", CLEAR_ON_MANAGER_START},
     {"ForcePowerDown", CLEAR_ON_MANAGER_START},
     {"JoystickDebugMode", CLEAR_ON_MANAGER_START | CLEAR_ON_IGNITION_OFF},
-    {"LkasFullRangeAvailable", PERSISTENT},
-    {"ChryslerMangoLat", PERSISTENT},
-    {"ChryslerMangoLong", PERSISTENT},
-    {"ChryslerMadGas", PERSISTENT},
 };
 
 } // namespace

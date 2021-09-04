@@ -23,21 +23,15 @@ class CarInterface(CarInterfaceBase):
 
     # Long tuning Params -  make individual params for cars, baseline Pacifica Hybrid
     ret.longitudinalTuning.kpBP = [0., .3, 10., 35.]
-    ret.longitudinalTuning.kpV = [0.6, 0.6, .6, .6]
+    ret.longitudinalTuning.kpV = [1.8, 1.2, .8, .6]
     ret.longitudinalTuning.kiBP = [0., .3, 15., 35.]
-    ret.longitudinalTuning.kiV = [0.006, .005, .005, .0045]
+    ret.longitudinalTuning.kiV = [0.15, .10, .05, .045]
     ret.longitudinalTuning.deadzoneBP = [0., .5]
     ret.longitudinalTuning.deadzoneV = [0.00, 0.00]
-    #ret.accelMaxBP = [0., 1., 1.1, 15., 40.]
-    #ret.accelMaxV = [2., 2., 2., 2., 2.]
-    #ret.decelMaxBP = [0., 5., 5.1]
-    #ret.decelMaxV = [3.8, 3.8, 3.8]  # safety limits to stop unintended deceleration
     ret.longitudinalTuning.kfBP = [0., 5., 10., 20., 30.]
     ret.longitudinalTuning.kfV = [1., 1., 1., 1., .95]
     ret.startAccel = 0.5
     ret.minSpeedCan = 0.3
-    #ret.stoppingBrakeRate = 0.2 # brake_travel/s while trying to stop
-    #ret.startingBrakeRate = 2.0 # brake_travel/s while releasing on restart
     ret.stoppingControl = True
 
     if not Params().get_bool('ChryslerMangoLat'):
@@ -58,9 +52,9 @@ class CarInterface(CarInterfaceBase):
       ret.lateralTuning.pid.kfBP = [0., 15., 30.]
       ret.lateralTuning.pid.kfV = [0.000015, 0.000025, 0.000035]   # full torque for 10 deg at 80mph means 0.00007818594
 
-    ret.steerActuatorDelay = 0.2
-    ret.steerRateCost = 0.5
-    ret.steerLimitTimer = 0.7
+    ret.steerActuatorDelay = 0.1
+    ret.steerRateCost = 0.7
+    ret.steerLimitTimer = 0.4
 
     if candidate in (CAR.JEEP_CHEROKEE, CAR.JEEP_CHEROKEE_2019):
       ret.wheelbase = 2.91  # in meters

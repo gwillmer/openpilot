@@ -6,12 +6,10 @@ from selfdrive.modeld.constants import T_IDXS
 
 LongCtrlState = log.ControlsState.LongControlState
 
-ACCEL_MAX = 2.0
-ACCEL_MIN = -3.8
 STOPPING_EGO_SPEED = 0.5
 STOPPING_TARGET_SPEED_OFFSET = 0.01
 STARTING_TARGET_SPEED = 0.5
-DECEL_THRESHOLD_TO_PID = 0.2
+DECEL_THRESHOLD_TO_PID = 0.8
 
 DECEL_STOPPING_TARGET = 2.0  # apply at least this amount of brake to maintain the vehicle stationary
 
@@ -59,18 +57,11 @@ def long_control_state_trans(active, long_control_state, v_ego, v_target, v_pid,
 class LongControl():
   def __init__(self, CP):
     self.long_control_state = LongCtrlState.off  # initialized to off
-
-    kdBP = [0., 16., 35.]
-    kdV = [0.008, 0.015, 0.051]
-
     self.pid = PIDLongController((CP.longitudinalTuning.kpBP, CP.longitudinalTuning.kpV),
                             (CP.longitudinalTuning.kiBP, CP.longitudinalTuning.kiV),
                             (CP.longitudinalTuning.kfBP, CP.longitudinalTuning.kfV),
-                            (kdBP, kdV),
                             rate=RATE,
                             sat_limit=0.8)
-    self.pid.pos_limit = ACCEL_MAX
-    self.pid.neg_limit = ACCEL_MIN
     self.v_pid = 0.0
     self.last_output_accel = 0.0
 
@@ -79,19 +70,21 @@ class LongControl():
     self.pid.reset()
     self.v_pid = v_pid
 
-  def update(self, active, CS, CP, long_plan, drel, vrel, has_lead):
+  def update(self, active, CS, CP, long_plan, accel_limits, drel, vrel, has_lead):
     """Update longitudinal control. This updates the state machine and runs a PID loop"""
     # Interp control trajectory
-    # TODO estimate car specific lag, use .5s for now
+    # TODO estimate car specific lag, use .15s for now
     if len(long_plan.speeds) == CONTROL_N:
       v_target = interp(DEFAULT_LONG_LAG, T_IDXS[:CONTROL_N], long_plan.speeds)
       v_target_future = long_plan.speeds[-1]
-      a_target = interp(DEFAULT_LONG_LAG, T_IDXS[:CONTROL_N], long_plan.accels)
+      a_target = 2 * (v_target - long_plan.speeds[0])/DEFAULT_LONG_LAG - long_plan.accels[0]
     else:
       v_target = 0.0
       v_target_future = 0.0
       a_target = 0.0
 
+    self.pid.neg_limit = accel_limits[0]
+    self.pid.pos_limit = accel_limits[1]
 
     # Update state machine
     output_accel = self.last_output_accel
@@ -113,8 +106,9 @@ class LongControl():
       # Freeze the integrator so we don't accelerate to compensate, and don't allow positive acceleration
       prevent_overshoot = not CP.stoppingControl and CS.vEgo < 1.5 and v_target_future < 0.7
       deadzone = interp(v_ego_pid, CP.longitudinalTuning.deadzoneBP, CP.longitudinalTuning.deadzoneV)
+      freeze_integrator = prevent_overshoot
 
-      output_accel = self.pid.update(self.v_pid, v_ego_pid, speed=v_ego_pid, deadzone=deadzone, feedforward=a_target, freeze_integrator=prevent_overshoot, reset=False)
+      output_accel = self.pid.update(self.v_pid, v_ego_pid, speed=v_ego_pid, deadzone=deadzone, feedforward=a_target, freeze_integrator=freeze_integrator, reset=False)
 
       if prevent_overshoot:
         output_accel = min(output_accel, 0.0)
@@ -127,19 +121,17 @@ class LongControl():
       if CS.standstill:
         temp_reset = self.pid.update(v_ego_pid, v_ego_pid, speed=v_ego_pid, deadzone=0.0, feedforward=0.0,
                                     freeze_integrator=0.0, reset=True)
-      output_accel = clip(output_accel, ACCEL_MIN, ACCEL_MAX)
+      output_accel = clip(output_accel, accel_limits[0], accel_limits[1])
 
       self.reset(CS.vEgo)
 
     # Intention is to move again, release brake fast before handing control to PID
     elif self.long_control_state == LongCtrlState.starting:
       if output_accel < -DECEL_THRESHOLD_TO_PID:
-        output_accel = -DECEL_THRESHOLD_TO_PID
-      if output_accel < -DECEL_THRESHOLD_TO_PID:
-        output_accel += CP.startingDecelRate / RATE
+        output_accel += CP.startingAccelRate / RATE
       self.reset(CS.vEgo)
 
     self.last_output_accel = output_accel
-    final_accel = clip(output_accel, ACCEL_MIN, ACCEL_MAX)
+    final_accel = clip(output_accel, accel_limits[0], accel_limits[1])
 
     return final_accel, v_target, a_target

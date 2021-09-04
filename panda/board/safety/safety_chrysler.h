@@ -16,7 +16,8 @@ AddrCheckStruct chrysler_rx_checks[] = {
   {.msg = {{308, 0, 8, .check_checksum = false, .max_counter = 15U,  .expected_timestep = 20000U}, { 0 }, { 0 }}},
   {.msg = {{320, 0, 8, .check_checksum = true, .max_counter = 15U,  .expected_timestep = 20000U}, { 0 }, { 0 }}},
 };
-const int CHRYSLER_RX_CHECK_LEN = sizeof(chrysler_rx_checks) / sizeof(chrysler_rx_checks[0]);
+#define CHRYSLER_ADDR_CHECK_LEN (sizeof(chrysler_addr_checks) / sizeof(chrysler_addr_checks[0]))
+addr_checks chrysler_rx_checks = {chrysler_addr_checks, CHRYSLER_ADDR_CHECK_LEN};
 
 static uint8_t chrysler_get_checksum(CAN_FIFOMailBox_TypeDef *to_push) {
   int checksum_byte = GET_LEN(to_push) - 1;
@@ -65,7 +66,7 @@ static int chrysler_rx_hook(CAN_FIFOMailBox_TypeDef *to_push) {
 
   bool unsafe_chrysler_mango = unsafe_mode & UNSAFE_CHRYSLER_MANGO;
 
-  bool valid = addr_safety_check(to_push, chrysler_rx_checks, CHRYSLER_RX_CHECK_LEN,
+  bool valid = addr_safety_check(to_push, &chrysler_rx_checks,
                                  chrysler_get_checksum, chrysler_compute_checksum,
                                  chrysler_get_counter);
 
@@ -209,13 +210,17 @@ static int chrysler_fwd_hook(int bus_num, CAN_FIFOMailBox_TypeDef *to_fwd) {
   return bus_fwd;
 }
 
+static const addr_checks* chrysler_init(int16_t param) {
+  UNUSED(param);
+  controls_allowed = false;
+  relay_malfunction_reset();
+  return &chrysler_rx_checks;
+}
 
 const safety_hooks chrysler_hooks = {
-  .init = nooutput_init,
+  .init = chrysler_init,
   .rx = chrysler_rx_hook,
   .tx = chrysler_tx_hook,
   .tx_lin = nooutput_tx_lin_hook,
   .fwd = chrysler_fwd_hook,
-  .addr_check = chrysler_rx_checks,
-  .addr_check_len = sizeof(chrysler_rx_checks) / sizeof(chrysler_rx_checks[0]),
 };

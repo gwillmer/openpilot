@@ -302,8 +302,8 @@ struct CarControl {
 
   struct Actuators {
     # range from 0.0 - 1.0
-    gas @0: Float32;
-    brake @1: Float32;
+    gasDEPRECATED @0: Float32;
+    brakeDEPRECATED @1: Float32;
     # range from -1.0 - 1.0
     steer @2: Float32;
     steeringAngleDeg @3: Float32;
