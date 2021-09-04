@@ -181,7 +181,7 @@ class PIDLongController():
          not freeze_integrator:
         self.i = i
     
-    if error <= 0: # brake controller is very accurate, only needs feed forward
+    if -.5 < error > 1.: # brake controller is very accurate, only needs feed forward
        control = self.f + self.i/10
     else:
        control = self.p + self.f + self.i
