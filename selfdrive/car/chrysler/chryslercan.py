@@ -71,17 +71,18 @@ def create_wheel_buttons(packer, counter, button_type):
 
 def create_op_acc_1(packer, accel_active, trq_val, acc_counter):
   values = { # 20ms
-    "ACC_ENG_REQ": accel_active,
-    "ACC_TORQ": trq_val,
+    "ACC_PHEV_ENG_REQ": accel_active,
+    "ACC_PHEV_TORQ": trq_val,
     "COUNTER": acc_counter
   }
   return packer.make_can_msg("OP_ACC_1", 0, values)
 
-def create_op_acc_2(packer, available, enabled, stop_req, go_req, acc_pre_brake, decel, decel_active, acc_counter):
+def create_op_acc_2(packer, available, enabled, stop_req, go_req, acc_pre_brake, torque, decel, decel_active, acc_counter):
   values = { # 20ms
     "ACC_STOP": stop_req,
-    "ACC_GO": go_req,
+    "ACC_GO_PREP": go_req,
     "ACC_DECEL_CMD": decel,
+    "ACC_TORQUE_CMD": torque,
     "ACC_AVAILABLE": available,
     "ACC_ENABLED": enabled,
     "ACC_BRK_PREP": acc_pre_brake,

@@ -328,6 +328,7 @@ BO_ 324 TRANS_1: 8 XXX
  SG_ TRANS_SPEED : 31|16@0+ (0.01,0) [0|255] "m/s" XXX
  SG_ GEAR : 15|4@0+ (1,0) [0|1] "" XXX
  SG_ GEAR_FINAL : 11|4@0+ (1,0) [0|1] "" XXX
+ SG_ SHIFTING : 2|1@0+ (1,0) [0|1] "" XXX
 
 BO_ 501 DASHBOARD: 8 XXX
  SG_ ACC_DISP_MSG : 7|8@0+ (1,0) [0|1] "" XXX
@@ -379,7 +380,8 @@ BO_ 500 ACC_2: 8 XXX
  SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
  SG_ COUNTER : 55|4@0+ (1,0) [0|15] "" XXX
  SG_ ACC_STOP : 5|1@0+ (1,0) [0|1] "" XXX
- SG_ ACC_GO : 6|1@0+ (1,0) [0|1] "" XXX
+ SG_ ACC_GO_HOLD : 7|1@0+ (1,0) [0|1] "" XXX
+ SG_ ACC_GO_PREP : 6|1@0+ (1,0) [0|1] "" XXX
  SG_ ACC_DECEL_CMD : 19|12@0+ (0.004885,-16) [-16|4] "m/s2" XXX
  SG_ ACC_AVAILABLE : 20|1@0+ (1,0) [0|1] "" XXX
  SG_ ACC_ENABLED : 21|1@0+ (1,0) [0|1] "" XXX
@@ -388,12 +390,14 @@ BO_ 500 ACC_2: 8 XXX
  SG_ ACC_BRK_PREP : 49|1@0+ (1,0) [0|1] "" XXX
  SG_ COMMAND_TYPE_2 : 50|1@0+ (1,0) [0|1] "" XXX
  SG_ COMMAND_TYPE : 38|3@0+ (1,0) [0|7] "" XXX
+ SG_ ACC_TORQUE_CMD : 3|12@0+ (0.25,-500) [0|255] "Nm" XXX
 
 BO_ 502 OP_ACC_2: 8 XXX
  SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
  SG_ COUNTER : 55|4@0+ (1,0) [0|15] "" XXX
  SG_ ACC_STOP : 5|1@0+ (1,0) [0|1] "" XXX
- SG_ ACC_GO : 6|1@0+ (1,0) [0|1] "" XXX
+ SG_ ACC_GO_HOLD : 7|1@0+ (1,0) [0|1] "" XXX
+ SG_ ACC_GO_PREP : 6|1@0+ (1,0) [0|1] "" XXX
  SG_ ACC_DECEL_CMD : 19|12@0+ (0.004885,-16) [-16|4] "m/s2" XXX
  SG_ ACC_AVAILABLE : 20|1@0+ (1,0) [0|1] "" XXX
  SG_ ACC_ENABLED : 21|1@0+ (1,0) [0|1] "" XXX
@@ -402,18 +406,21 @@ BO_ 502 OP_ACC_2: 8 XXX
  SG_ ACC_BRK_PREP : 49|1@0+ (1,0) [0|1] "" XXX
  SG_ COMMAND_TYPE_2 : 50|0@0+ (1,0) [0|3] "" XXX
  SG_ COMMAND_TYPE : 38|3@0+ (1,0) [0|7] "" XXX
+ SG_ ACC_TORQUE_CMD : 3|12@0+ (0.25,-500) [0|255] "Nm" XXX
 
 BO_ 625 ACC_1: 8 XXX
  SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
  SG_ COUNTER : 55|4@0+ (1,0) [0|15] "" XXX
- SG_ ACC_ENG_REQ : 39|1@0+ (1,0) [0|1] "" XXX
- SG_ ACC_TORQ : 38|15@0+ (1,-7767) [-7767|24999] "NM" XXX
+ SG_ ACC_PHEV_ENG_REQ : 39|1@0+ (1,0) [0|1] "" XXX
+ SG_ ACC_PHEV_TORQ : 38|15@0+ (1,-7767) [-7767|24999] "NM" XXX
+ SG_ VELO_REQ : 31|8@0+ (1,0) [0|255] "km/h" XXX
 
 BO_ 626 OP_ACC_1: 8 XXX
  SG_ CHECKSUM : 63|8@0+ (1,0) [0|255] "" XXX
  SG_ COUNTER : 55|4@0+ (1,0) [0|15] "" XXX
  SG_ ACC_ENG_REQ : 39|1@0+ (1,0) [0|1] "" XXX
  SG_ ACC_TORQ : 38|15@0+ (1,-7767) [-7767|24999] "NM" XXX
+ SG_ VELO_REQ : 31|8@0+ (1,0) [0|255] "km/h" XXX
 
 BO_ 268 ESC_ACC_COPY: 8 XXX
  SG_ BRAKE_PERHAPS : 48|1@0+ (1,0) [0|3] "" XXX
@@ -517,6 +524,8 @@ CM_ SG_ 908 INCREASING_MSB "time based";
 CM_ SG_ 500 ACC_DECEL_CMD "ACC deceleration only. doesn't command acceleration";
 CM_ SG_ 500 BRAKE_WARN "!!BRAKE!! warining";
 CM_ SG_ 500 COLLISION_BRK_PREP "seems to step brake before collision braking";
+CM_ SG_ 500 ACC_GO_HOLD "1 when acc accelerating (or at least not braking)";
+CM_ SG_ 500 ACC_GO_PREP "when starting from standstill, not initial gas";
 CM_ SG_ 500 ACC_BRK_PREP "sometimes this flag goes high just before ACC deceleration";
 CM_ SG_ 500 COMMAND_TYPE_2 "0-NONE; 1- ACC; 2- COLLISION";
 CM_ SG_ 500 COMMAND_TYPE "0-NONE; 1-ACC; 2-COLLISION";
