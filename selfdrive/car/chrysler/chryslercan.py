@@ -59,10 +59,11 @@ def create_op_acc_1(packer, accel_active, trq_val, acc_counter):
   }
   return packer.make_can_msg("OP_ACC_1", 0, values)
 
-def create_op_acc_2(packer, available, enabled, stop_req, go_req, acc_pre_brake, torque, decel, decel_active, acc_counter):
+def create_op_acc_2(packer, available, enabled, stop_req, go_req, go_hold, acc_pre_brake, torque, decel, decel_active, acc_counter):
   values = { # 20ms
     "ACC_STOP": stop_req,
     "ACC_GO_PREP": go_req,
+    "ACC_GO_HOLD": go_hold,
     "ACC_DECEL_CMD": decel,
     "ACC_TORQUE_CMD": torque,
     "ACC_AVAILABLE": available,
