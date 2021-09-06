@@ -62,7 +62,9 @@ class CarState(CarStateBase):
     ret.cruiseState.nonAdaptive = cp.vl["DASHBOARD"]["CRUISE_STATE"] in [1, 2]
 
     ret.steeringTorque = cp.vl["EPS_STATUS"]["TORQUE_DRIVER"]/4
-    self.apaFault = cp.vl["EPS_STATUS"]["APA_STEER_FAULT"] == 1
+    ret.steeringTorqueEps = cp.vl["EPS_STATUS"]["TORQUE_MOTOR"]
+    ret.steeringPressed = abs(ret.steeringTorque) > STEER_THRESHOLD/4
+    self.steerError = cp.vl["EPS_STATUS"]["LKAS_STEER_FAULT"] == 4
 
     ret.genericToggle = bool(cp.vl["STEERING_LEVERS"]["HIGH_BEAM_FLASH"])
 
@@ -72,7 +74,6 @@ class CarState(CarStateBase):
 
     self.lkas_counter = cp_cam.vl["LKAS_COMMAND"]["COUNTER"]
     self.lkas_status_ok = cp_cam.vl["LKAS_HEARTBIT"]["LKAS_BUTTON_LED"]
-    self.apa_steer_status = cp.vl["AUTO_PARK_REQUEST"]["APA_STEER_ACT"] == 1
     if self.CP.enablehybridEcu:
        if cp.vl["HYBRID_ECU"]["VEH_ON"] == 1:
          self.veh_on_timer += 1
