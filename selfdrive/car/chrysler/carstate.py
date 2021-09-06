@@ -108,6 +108,9 @@ class CarState(CarStateBase):
     self.accbrakeFaulted = ((cp.vl["BRAKE_2"]["ACC_BRAKE_FAIL"]) > 0) or ((cp.vl["ACC_ERROR"]["ACC_ERROR"]) > 0)
     self.accengFaulted = (cp.vl["ACCEL_RELATED_120"]["ACC_ENG_OK"]) == 0
 
+
+    self.gear_final = int(cp.vl["TRANS_1"]["GEAR_FINAL"])
+
     return ret
 
   @staticmethod
@@ -164,6 +167,7 @@ class CarState(CarStateBase):
       ("ACC_BRAKE_FAIL", "BRAKE_2", 0),
       ("ACC_ENG_OK", "ACCEL_RELATED_120", 0),
       ("ACC_ERROR", "ACC_ERROR", 0),
+      ("GEAR_FINAL", "TRANS_1", 0),
       ("LONG_ACCEL", "INERTIAL_SENSOR", 0),
     ]
 
@@ -180,6 +184,7 @@ class CarState(CarStateBase):
       ("DASHBOARD", 15),
       ("STEERING_LEVERS", 10),
       ("SEATBELT_STATUS", 2),
+      ("TRANS_1", 50),
       ("DOORS", 1),
       ("TRACTION_BUTTON", 1),
       ("BLIND_SPOT_WARNINGS", 2),

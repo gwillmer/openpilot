@@ -15,6 +15,8 @@ from selfdrive.car.chrysler.chryslerlonghelper import cluster_chime, accel_hyste
   STOP_BRAKE_THRESHOLD, START_GAS_THRESHOLD, CHIME_GAP_TIME, ACCEL_SCALE, ACCEL_MIN, ACCEL_MAX
 
 LongCtrlState = car.CarControl.Actuators.LongControlState
+GEAR_RATIOS = [4.70,2.84,1.91,1.38,1.00,0.81,0.70,0.58,0.48,0.0,0.0,0.0,0.0]
+AXLE_RATIO = 3.25
 
 class CarController():
   def __init__(self, dbc_name, CP, VM):
@@ -63,6 +65,7 @@ class CarController():
     self.stop_req = False
     self.decel_val_prev = 0.
     self.done = False
+    self.gear_final = 0
 
     self.packer = CANPacker(dbc_name)
 
@@ -256,7 +259,13 @@ class CarController():
     if enabled and not CS.out.brakePressed and not (CS.out.standstill and (self.stop_req or self.decel_active)) and\
             (apply_accel >= max(START_GAS_THRESHOLD, (CS.axle_torq_min + 20.)/CV.ACCEL_TO_NM)
              or self.accel_active and not self.decel_active and apply_accel > (CS.axle_torq_min - 20.)/CV.ACCEL_TO_NM):
-      self.trq_val = apply_accel * CV.ACCEL_TO_NM
+      
+      
+      if self.hybridEcu:
+        self.trq_val = apply_accel * CV.ACCEL_TO_NM
+      else:
+        self.gear_final = int(CS.gear_final) - 1
+        self.trq_val = (apply_accel*CS.CP.mass + 0.5*0.924*1.225*CS.out.vEgo*CS.out.vEgo)*0.37791/(GEAR_RATIOS[self.gear_final]*AXLE_RATIO*0.85) if self.gear_final < 8 else 0
 
       if CS.axle_torq_max > self.trq_val > CS.axle_torq_min:
         self.accel_active = True
@@ -264,8 +273,8 @@ class CarController():
       else:
         self.trq_val = CS.axle_torq_min
         self.accel_active = False
-      if not self.hybridEcu:
-        self.trq_val /= 15.5  # GEAR_RATO guess for non hybrid?
+      #if not self.hybridEcu:
+      #  self.trq_val /= 15.5  # GEAR_RATO guess for non hybrid?
     else:
       self.accel_active = False
 
@@ -277,10 +286,20 @@ class CarController():
     if self.ccframe % 2 == 0:
       self.acc_counter %= 0xF
       self.acc_counter += 1
-      new_msg = create_op_acc_1(self.packer, self.accel_active, self.trq_val, self.acc_counter)
+      if self.hybridEcu:
+        new_msg = create_op_acc_1(self.packer, self.accel_active, self.trq_val, self.acc_counter)
+      else:
+        new_msg = create_op_acc_1(self.packer, 0, 25000, self.acc_counter)
+
       can_sends.append(new_msg)
-      new_msg = create_op_acc_2(self.packer, self.acc_available, self.acc_enabled, self.stop_req, self.go_req,
-                                self.acc_pre_brake, self.decel_val, self.decel_active, self.acc_counter)
+      if self.hybridEcu:
+        new_msg = create_op_acc_2(self.packer, self.acc_available, self.acc_enabled, self.stop_req, self.go_req, 0,
+                                  self.acc_pre_brake, 0, self.decel_val, self.decel_active, self.acc_counter)
+      else:
+        new_msg = create_op_acc_2(self.packer, self.acc_available, self.acc_enabled, self.stop_req, self.go_req, self.accel_active,
+                                  self.acc_pre_brake, self.trq_val, self.decel_val, self.decel_active, self.acc_counter)
+
+
       can_sends.append(new_msg)
     if self.ccframe % 6 == 0:
       new_msg = create_op_dashboard(self.packer, self.set_speed, self.cruise_state, self.cruise_icon, op_lead_visible,
