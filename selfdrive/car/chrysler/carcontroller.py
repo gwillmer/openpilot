@@ -227,7 +227,7 @@ class CarController():
     self.stop_req = enabled and CS.out.standstill and not CS.out.gasPressed and not self.go_req
     if self.go_req or self.stop_req:
       start_accel_max = max(0, CS.hill_accel) * CV.ACCEL_TO_NM
-      start_accel_max = max(start_accel_max, (CS.axle_torq_min + 50)/CV.ACCEL_TO_NM)
+      start_accel_max = max(start_accel_max, (CS.axle_torq_min + 50)/CV.ACCEL_TO_NM) if self.hybridEcu else start_accel_max
       accmaxhyb = [start_accel_max, start_accel_max, start_accel_max]
 
     apply_accel, self.accel_steady = accel_hysteresis(apply_accel, self.accel_steady)
@@ -240,9 +240,9 @@ class CarController():
 
     if enabled and not CS.out.gasPressed and not self.go_req and\
             (self.stop_req
-             or (apply_accel <= min(CS.axle_torq_min/CV.ACCEL_TO_NM, START_BRAKE_THRESHOLD))
+             or (apply_accel <= min(CS.axle_torq_min/CV.ACCEL_TO_NM, START_BRAKE_THRESHOLD) if self.hybridEcu else START_BRAKE_THRESHOLD)
              or (self.decel_active and ((CS.out.brake > 10.) or (CS.hybrid_power_meter < 0.)) and
-                 (apply_accel < max((CS.axle_torq_min + 20.)/CV.ACCEL_TO_NM, STOP_BRAKE_THRESHOLD)))):
+                 (apply_accel < max((CS.axle_torq_min + 20.)/CV.ACCEL_TO_NM, STOP_BRAKE_THRESHOLD) if self.hybridEcu else STOP_BRAKE_THRESHOLD))):
       self.decel_active = True
       self.decel_val = apply_accel
       if self.decel_val_prev > self.decel_val and not self.done:
@@ -256,22 +256,23 @@ class CarController():
       self.done = False
       self.decel_val_prev = CS.out.aEgo
 
+    self.gear_final = int(CS.gear_final) - 1
+    self.trq_val = (apply_accel*CS.CP.mass + 0.5*0.924*1.225*CS.out.vEgo*CS.out.vEgo)*0.37791/(GEAR_RATIOS[self.gear_final]*AXLE_RATIO*0.85) if self.gear_final < 8 else 0
+    
     if enabled and not CS.out.brakePressed and not (CS.out.standstill and (self.stop_req or self.decel_active)) and\
-            (apply_accel >= max(START_GAS_THRESHOLD, (CS.axle_torq_min + 20.)/CV.ACCEL_TO_NM)
-             or self.accel_active and not self.decel_active and apply_accel > (CS.axle_torq_min - 20.)/CV.ACCEL_TO_NM):
+            (apply_accel >= (max(START_GAS_THRESHOLD, (CS.axle_torq_min + 20.)/CV.ACCEL_TO_NM) if self.hybridEcu else START_GAS_THRESHOLD)
+             or self.accel_active and not self.decel_active and (apply_accel > ((CS.axle_torq_min - 20.)/CV.ACCEL_TO_NM if self.hybridEcu else 0))):
       
       
       if self.hybridEcu:
         self.trq_val = apply_accel * CV.ACCEL_TO_NM
-      else:
-        self.gear_final = int(CS.gear_final) - 1
-        self.trq_val = (apply_accel*CS.CP.mass + 0.5*0.924*1.225*CS.out.vEgo*CS.out.vEgo)*0.37791/(GEAR_RATIOS[self.gear_final]*AXLE_RATIO*0.85) if self.gear_final < 8 else 0
+      
 
-      if CS.axle_torq_max > self.trq_val > CS.axle_torq_min:
+      if (CS.axle_torq_max > self.trq_val > CS.axle_torq_min) or (not self.hybridEcu and apply_accel > 0): 
         self.accel_active = True
         self.stop_req = False
       else:
-        self.trq_val = CS.axle_torq_min
+        #self.trq_val = CS.axle_torq_min
         self.accel_active = False
       #if not self.hybridEcu:
       #  self.trq_val /= 15.5  # GEAR_RATO guess for non hybrid?
