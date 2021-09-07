@@ -252,7 +252,7 @@ class CarController():
       self.decel_val_prev = CS.out.aEgo
 
     self.gear_final = int(CS.gear_final) - 1
-    self.trq_val = ((apply_accel*CS.CP.mass + 0.5*0.924*1.225*CS.out.vEgo*CS.out.vEgo)*0.37791/(GEAR_RATIOS[self.gear_final]*AXLE_RATIO*0.85)) if GEAR_RATIOS[self.gear_final] > 0 else 0
+    self.trq_val = ((apply_accel*CS.CP.mass + 0.5*0.924*1.225*CS.out.vEgo*CS.out.vEgo)*0.37791/(2*GEAR_RATIOS[self.gear_final]*AXLE_RATIO)) if GEAR_RATIOS[self.gear_final] > 0 else 0
     
     if enabled and not CS.out.brakePressed and not (CS.out.standstill and (self.stop_req or self.decel_active)) and\
             (apply_accel >= (max(START_GAS_THRESHOLD, (CS.axle_torq_min + 20.)/CV.ACCEL_TO_NM) if self.hybridEcu else START_GAS_THRESHOLD)
