@@ -15,7 +15,7 @@ from selfdrive.car.chrysler.chryslerlonghelper import cluster_chime, accel_hyste
   STOP_BRAKE_THRESHOLD, START_GAS_THRESHOLD, CHIME_GAP_TIME, ACCEL_SCALE, ACCEL_MIN, ACCEL_MAX
 
 GEAR_RATIOS = [4.70,2.84,1.91,1.38,1.00,0.81,0.70,0.58,0.48,0.0,0.0,0.0,0.0]
-AXLE_RATIO = 3.25
+FINAL_DRIVE_RATIO = 3.25
 
 class CarController():
   def __init__(self, dbc_name, CP, VM):
@@ -252,7 +252,6 @@ class CarController():
       self.decel_val_prev = CS.out.aEgo
 
     self.gear_final = int(CS.gear_final) - 1
-    self.trq_val = ((apply_accel*CS.CP.mass + 0.5*0.924*1.225*CS.out.vEgo*CS.out.vEgo)*0.37791/(2*GEAR_RATIOS[self.gear_final]*AXLE_RATIO)) if GEAR_RATIOS[self.gear_final] > 0 else 0
     
     if enabled and not CS.out.brakePressed and not (CS.out.standstill and (self.stop_req or self.decel_active)) and\
             (apply_accel >= (max(START_GAS_THRESHOLD, (CS.axle_torq_min + 20.)/CV.ACCEL_TO_NM) if self.hybridEcu else START_GAS_THRESHOLD)
@@ -264,9 +263,11 @@ class CarController():
       
 
       if (CS.axle_torq_max > self.trq_val > CS.axle_torq_min) or (not self.hybridEcu and apply_accel > 0): 
+        self.trq_val = ((apply_accel*CS.CP.mass + 0.5*0.924*1.225*CS.out.vEgo*CS.out.vEgo)*0.37973/(2*GEAR_RATIOS[self.gear_final]*FINAL_DRIVE_RATIO)) if GEAR_RATIOS[self.gear_final] > 0 else 0
         self.accel_active = True
         self.stop_req = False
       else:
+        self.trq_val = ((apply_accel*CS.CP.mass + 0.5*0.924*1.225*CS.out.vEgo*CS.out.vEgo)*0.37973/(2*GEAR_RATIOS[self.gear_final]*FINAL_DRIVE_RATIO)) if GEAR_RATIOS[self.gear_final] > 0 else 0
         #self.trq_val = CS.axle_torq_min
         self.accel_active = False
       #if not self.hybridEcu:
