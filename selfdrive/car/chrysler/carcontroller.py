@@ -300,7 +300,7 @@ class CarController():
       can_sends.append(new_msg)
     if self.ccframe % 6 == 0:
       new_msg = create_op_dashboard(self.packer, self.set_speed, self.cruise_state, self.cruise_icon, op_lead_visible,
-                                    op_lead_dist, self.op_long_enable)
+                                    op_lead_dist, False) # self.op_long_enable)
       can_sends.append(new_msg)
 
     new_msg = create_op_chime(self.packer, self.chime, self.chime_timer, self.gap_timer, CHIME_GAP_TIME)
