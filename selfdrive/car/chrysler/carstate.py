@@ -87,7 +87,7 @@ class CarState(CarStateBase):
     else:
       self.veh_on_timer += 1
       self.veh_on = self.veh_on_timer >= 200
-      self.axle_torq_min = 0.
+      self.axle_torq_min = 1.
       self.axle_torq_max = 300.
       self.hybrid_power_meter = 1
 
