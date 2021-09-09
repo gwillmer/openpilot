@@ -16,7 +16,7 @@ from selfdrive.car.chrysler.chryslerlonghelper import cluster_chime, accel_hyste
 
 LongCtrlState = car.CarControl.Actuators.LongControlState
 GEAR_RATIOS = [4.70,2.84,1.91,1.38,1.00,0.81,0.70,0.58,0.48,0.0,0.0,0.0,0.0]
-FINAL_DRIVE_RATIO = 3.25
+AXLE_RATIO = 3.25
 
 class CarController():
   def __init__(self, dbc_name, CP, VM):
@@ -268,11 +268,11 @@ class CarController():
       
 
       if (CS.axle_torq_max > self.trq_val > CS.axle_torq_min) or (not self.hybridEcu and apply_accel > 0): 
-        self.trq_val = ((apply_accel*CS.CP.mass + 0.5*0.924*1.225*CS.out.vEgo*CS.out.vEgo)*0.37973/(2*GEAR_RATIOS[self.gear_final]*FINAL_DRIVE_RATIO)) if GEAR_RATIOS[self.gear_final] > 0 else 0
+        self.trq_val = ((apply_accel*CS.CP.mass + 0.5*0.924*1.225*CS.out.vEgo*CS.out.vEgo)*0.37973/(2*GEAR_RATIOS[self.gear_final]*AXLE_RATIO)) if GEAR_RATIOS[self.gear_final] > 0 else 0
         self.accel_active = True
         self.stop_req = False
       else:
-        self.trq_val = ((apply_accel*CS.CP.mass + 0.5*0.924*1.225*CS.out.vEgo*CS.out.vEgo)*0.37973/(2*GEAR_RATIOS[self.gear_final]*FINAL_DRIVE_RATIO)) if GEAR_RATIOS[self.gear_final] > 0 else 0
+        self.trq_val = ((apply_accel*CS.CP.mass + 0.5*0.924*1.225*CS.out.vEgo*CS.out.vEgo)*0.37973/(2*GEAR_RATIOS[self.gear_final]*AXLE_RATIO)) if GEAR_RATIOS[self.gear_final] > 0 else 0
         #self.trq_val = CS.axle_torq_min
         self.accel_active = False
       #if not self.hybridEcu:
@@ -305,7 +305,7 @@ class CarController():
       can_sends.append(new_msg)
     if self.ccframe % 6 == 0:
       new_msg = create_op_dashboard(self.packer, self.set_speed, self.cruise_state, self.cruise_icon, op_lead_visible,
-                                    op_lead_dist, False) # self.op_long_enable)
+                                    op_lead_dist, self.op_long_enable)
       can_sends.append(new_msg)
 
     new_msg = create_op_chime(self.packer, self.chime, self.chime_timer, self.gap_timer, CHIME_GAP_TIME)
