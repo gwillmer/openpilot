@@ -265,11 +265,12 @@ class CarController():
         self.trq_val = apply_accel * CV.ACCEL_TO_NM
       else:
         self.gear_final = int(CS.gear_final) - 1
-        self.trq_val = (apply_accel*CS.CP.mass + 0.5*0.924*1.225*CS.out.vEgo*CS.out.vEgo)*0.37791/(2*GEAR_RATIOS[self.gear_final]*AXLE_RATIO*0.85) if self.gear_final < 8 else 0
+        self.trq_val = (apply_accel*CS.CP.mass + 0.5*0.924*1.225*CS.out.vEgo*CS.out.vEgo)*0.37791/(1.5*GEAR_RATIOS[self.gear_final]*AXLE_RATIO*0.85) if self.gear_final < 8 else 0
 
       if CS.axle_torq_max > self.trq_val > CS.axle_torq_min:
         self.accel_active = True
         self.stop_req = False
+        self.decel_val = DEFAULT_DECEL
       else:
         self.trq_val = CS.axle_torq_min
         self.accel_active = False
