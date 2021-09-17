@@ -42,9 +42,9 @@ class CarState(CarStateBase):
     ret.vEgoRaw = cp.vl["BRAKE_1"]["VEHICLE_SPEED_KPH"] * CV.KPH_TO_MS
     ret.vEgo, ret.aEgo = self.update_speed_kf(ret.vEgoRaw)
     ret.standstill = bool(cp.vl["BRAKE_1"]["STANDSTILL"])
-    ret.long_accel = cp.vl["INERTIAL_SENSOR"]["LONG_ACCEL"]
-    ret.hill_accel_raw = ret.long_accel - ret.aEgo
-    ret.hill_accel, ret.hill_accel_rate = self.update_hill_kf(ret.hill_accel_raw)
+    self.long_accel = cp.vl["INERTIAL_SENSOR"]["LONG_ACCEL"]
+    self.hill_accel_raw = self.long_accel - ret.aEgo
+    ret.hillAccel, self.hill_accel_rate = self.update_hill_kf(self.hill_accel_raw)
 
     ret.leftBlinker = cp.vl["STEERING_LEVERS"]["TURN_SIGNALS"] == 1
     ret.rightBlinker = cp.vl["STEERING_LEVERS"]["TURN_SIGNALS"] == 2
