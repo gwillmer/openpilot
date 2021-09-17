@@ -460,10 +460,13 @@ class Controls:
       self.LaC.reset()
       self.LoC.reset(v_pid=CS.vEgo)
 
+    d_rel = self.sm['radarState'].leadOne.dRel
+    v_rel = self.sm['radarState'].leadOne.vRel
+    has_lead = self.sm['longitudinalPlan'].hasLead
     if not self.joystick_mode:
       # accel PID loop
       pid_accel_limits = self.CI.get_pid_accel_limits(self.CP, CS.vEgo, self.v_cruise_kph * CV.KPH_TO_MS)
-      actuators.accel = self.LoC.update(self.active, CS, self.CP, long_plan, pid_accel_limits)
+      actuators.accel = self.LoC.update(self.active, CS, self.CP, long_plan, pid_accel_limits, d_rel, v_rel, has_lead)
 
       # Steering PID loop and lateral MPC
       desired_curvature, desired_curvature_rate = get_lag_adjusted_curvature(self.CP, CS.vEgo,
@@ -533,7 +536,9 @@ class Controls:
     CC.hudControl.setSpeed = float(self.v_cruise_kph * CV.KPH_TO_MS)
     CC.hudControl.speedVisible = self.enabled
     CC.hudControl.lanesVisible = self.enabled
+    CC.hudControl.leadvRel = self.sm['radarState'].leadOne.vRel
     CC.hudControl.leadVisible = self.sm['longitudinalPlan'].hasLead
+    CC.hudControl.leadDistance = self.sm['radarState'].leadOne.dRel
 
     right_lane_visible = self.sm['lateralPlan'].rProb > 0.5
     left_lane_visible = self.sm['lateralPlan'].lProb > 0.5

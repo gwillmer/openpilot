@@ -224,7 +224,7 @@ def startup_fuzzy_fingerprint_alert(CP: car.CarParams, sm: messaging.SubMaster, 
     "WARNING: No Exact Match on Car Model",
     f"Closest Match: {CP.carFingerprint.title()[:40]}",
     AlertStatus.userPrompt, AlertSize.mid,
-    Priority.LOWER, VisualAlert.none, AudibleAlert.none, 0., 0., 10.)
+    Priority.LOWER, VisualAlert.none, AudibleAlert.none, 0., 0., 15.)
 
 
 def joystick_alert(CP: car.CarParams, sm: messaging.SubMaster, metric: bool) -> Alert:
@@ -262,7 +262,7 @@ EVENTS: Dict[int, Dict[str, Union[Alert, Callable[[Any, messaging.SubMaster, boo
       "Be ready to take over at any time",
       "Always keep hands on wheel and eyes on road",
       AlertStatus.normal, AlertSize.mid,
-      Priority.LOWER, VisualAlert.none, AudibleAlert.none, 0., 0., 10.),
+      Priority.LOWER, VisualAlert.none, AudibleAlert.none, 0., 0., 15.),
   },
 
   EventName.startupMaster: {
@@ -270,7 +270,7 @@ EVENTS: Dict[int, Dict[str, Union[Alert, Callable[[Any, messaging.SubMaster, boo
       "WARNING: This branch is not tested",
       "Always keep hands on wheel and eyes on road",
       AlertStatus.userPrompt, AlertSize.mid,
-      Priority.LOWER, VisualAlert.none, AudibleAlert.none, 0., 0., 10.),
+      Priority.LOWER, VisualAlert.none, AudibleAlert.none, 0., 0., 15.),
   },
 
   # Car is recognized, but marked as dashcam only
@@ -279,7 +279,7 @@ EVENTS: Dict[int, Dict[str, Union[Alert, Callable[[Any, messaging.SubMaster, boo
       "Dashcam mode",
       "Always keep hands on wheel and eyes on road",
       AlertStatus.normal, AlertSize.mid,
-      Priority.LOWER, VisualAlert.none, AudibleAlert.none, 0., 0., 10.),
+      Priority.LOWER, VisualAlert.none, AudibleAlert.none, 0., 0., 15.),
   },
 
   # Car is not recognized
@@ -288,7 +288,7 @@ EVENTS: Dict[int, Dict[str, Union[Alert, Callable[[Any, messaging.SubMaster, boo
       "Dashcam mode for unsupported car",
       "Always keep hands on wheel and eyes on road",
       AlertStatus.normal, AlertSize.mid,
-      Priority.LOWER, VisualAlert.none, AudibleAlert.none, 0., 0., 10.),
+      Priority.LOWER, VisualAlert.none, AudibleAlert.none, 0., 0., 15.),
   },
 
   # openpilot uses the version strings from various ECUs to detect the correct car model.
@@ -308,7 +308,7 @@ EVENTS: Dict[int, Dict[str, Union[Alert, Callable[[Any, messaging.SubMaster, boo
       "Car Unrecognized",
       "Check All Connections",
       AlertStatus.userPrompt, AlertSize.mid,
-      Priority.LOWER, VisualAlert.none, AudibleAlert.none, 0., 0., 10.),
+      Priority.LOWER, VisualAlert.none, AudibleAlert.none, 0., 0., 15.),
   },
 
   EventName.dashcamMode: {
@@ -345,7 +345,7 @@ EVENTS: Dict[int, Dict[str, Union[Alert, Callable[[Any, messaging.SubMaster, boo
   EventName.carUnrecognized: {
     ET.PERMANENT: Alert(
       "Dashcam Mode",
-      "Car Unrecognized",
+      "Car Unrecognized- Please verify fingerprint with the fork owner",
       AlertStatus.normal, AlertSize.mid,
       Priority.LOWEST, VisualAlert.none, AudibleAlert.none, 0., 0., .2),
   },
@@ -519,7 +519,14 @@ EVENTS: Dict[int, Dict[str, Union[Alert, Callable[[Any, messaging.SubMaster, boo
       Priority.LOW, VisualAlert.steerRequired, AudibleAlert.chimePrompt, 1., 1., 1.),
   },
 
-  # Thrown when the fan is driven at >50% but is not rotating
+  EventName.hightorqsteerUnavailable: {
+    ET.PERMANENT: Alert(
+      "Mango Lat Not Enabled",
+      "Bring the vehicle to stop in fwd gear to re-enable",
+      AlertStatus.normal, AlertSize.mid,
+      Priority.LOWEST, VisualAlert.none, AudibleAlert.none, 0., 0., .2),
+  },
+
   EventName.fanMalfunction: {
     ET.PERMANENT: NormalPermanentAlert("Fan Malfunction", "Contact Support"),
   },
@@ -544,44 +551,44 @@ EVENTS: Dict[int, Dict[str, Union[Alert, Callable[[Any, messaging.SubMaster, boo
   # ********** events that affect controls state transitions **********
 
   EventName.pcmEnable: {
-    ET.ENABLE: EngagementAlert(AudibleAlert.chimeEngage),
+    ET.ENABLE: EngagementAlert(AudibleAlert.none),
   },
 
   EventName.buttonEnable: {
-    ET.ENABLE: EngagementAlert(AudibleAlert.chimeEngage),
+    ET.ENABLE: EngagementAlert(AudibleAlert.none),
   },
 
   EventName.pcmDisable: {
-    ET.USER_DISABLE: EngagementAlert(AudibleAlert.chimeDisengage),
+    ET.USER_DISABLE: EngagementAlert(AudibleAlert.none),
   },
 
   EventName.buttonCancel: {
-    ET.USER_DISABLE: EngagementAlert(AudibleAlert.chimeDisengage),
+    ET.USER_DISABLE: EngagementAlert(AudibleAlert.none),
   },
 
   EventName.brakeHold: {
-    ET.USER_DISABLE: EngagementAlert(AudibleAlert.chimeDisengage),
+    ET.USER_DISABLE: EngagementAlert(AudibleAlert.none),
     ET.NO_ENTRY: NoEntryAlert("Brake Hold Active"),
   },
 
   EventName.parkBrake: {
-    ET.USER_DISABLE: EngagementAlert(AudibleAlert.chimeDisengage),
+    ET.USER_DISABLE: EngagementAlert(AudibleAlert.none),
     ET.NO_ENTRY: NoEntryAlert("Park Brake Engaged"),
   },
 
   EventName.pedalPressed: {
-    ET.USER_DISABLE: EngagementAlert(AudibleAlert.chimeDisengage),
+    ET.USER_DISABLE: EngagementAlert(AudibleAlert.none),
     ET.NO_ENTRY: NoEntryAlert("Pedal Pressed During Attempt",
                               visual_alert=VisualAlert.brakePressed),
   },
 
   EventName.wrongCarMode: {
-    ET.USER_DISABLE: EngagementAlert(AudibleAlert.chimeDisengage),
+    ET.USER_DISABLE: EngagementAlert(AudibleAlert.none),
     ET.NO_ENTRY: wrong_car_mode_alert,
   },
 
   EventName.wrongCruiseMode: {
-    ET.USER_DISABLE: EngagementAlert(AudibleAlert.chimeDisengage),
+    ET.USER_DISABLE: EngagementAlert(AudibleAlert.none),
     ET.NO_ENTRY: NoEntryAlert("Enable Adaptive Cruise"),
   },
 
@@ -807,13 +814,8 @@ EVENTS: Dict[int, Dict[str, Union[Alert, Callable[[Any, messaging.SubMaster, boo
   },
 
   EventName.reverseGear: {
-    ET.PERMANENT: Alert(
-      "Reverse\nGear",
-      "",
-      AlertStatus.normal, AlertSize.full,
-      Priority.LOWEST, VisualAlert.none, AudibleAlert.none, 0., 0., .2, creation_delay=0.5),
-    ET.IMMEDIATE_DISABLE: ImmediateDisableAlert("Reverse Gear"),
-    ET.NO_ENTRY: NoEntryAlert("Reverse Gear"),
+    ET.USER_DISABLE: EngagementAlert(AudibleAlert.none),
+    ET.NO_ENTRY: NoEntryAlert("Shift Gear to Drive"),
   },
 
   # On cars that use stock ACC the car can decide to cancel ACC for various reasons.
@@ -854,7 +856,7 @@ EVENTS: Dict[int, Dict[str, Union[Alert, Callable[[Any, messaging.SubMaster, boo
       "openpilot Canceled",
       "Speed too low",
       AlertStatus.normal, AlertSize.mid,
-      Priority.HIGH, VisualAlert.none, AudibleAlert.chimeDisengage, .4, 2., 3.),
+      Priority.HIGH, VisualAlert.none, AudibleAlert.none, .4, 2., 3.),
   },
 
   # When the car is driving faster than most cars in the training data the model outputs can be unpredictable
