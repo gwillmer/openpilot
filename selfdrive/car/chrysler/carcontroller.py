@@ -239,10 +239,14 @@ class CarController():
     apply_accel = accel_rate_limit(self.accel_lim, self.accel_lim_prev, CS.out.standstill)
 
     if enabled and not CS.out.gasPressed and not self.go_req and\
-            (self.stop_req
-             or (apply_accel <= min(CS.axle_torq_min/CV.ACCEL_TO_NM, START_BRAKE_THRESHOLD))
-             or (self.decel_active and ((CS.out.brake > 10.) or (CS.hybrid_power_meter < 0.)) and
-                 (apply_accel < max((CS.axle_torq_min + 20.)/CV.ACCEL_TO_NM, STOP_BRAKE_THRESHOLD)))):
+                (self.stop_req 
+                or (apply_accel <= START_BRAKE_THRESHOLD)
+                or (self.decel_active and ((CS.out.brake > 10.) or (CS.hybrid_power_meter < 0.)) and
+                    (apply_accel < STOP_BRAKE_THRESHOLD))):
+    #        (self.stop_req
+    #         or (apply_accel <= min(CS.axle_torq_min/CV.ACCEL_TO_NM, START_BRAKE_THRESHOLD))
+    #         or (self.decel_active and ((CS.out.brake > 10.) or (CS.hybrid_power_meter < 0.)) and
+    #             (apply_accel < max((CS.axle_torq_min + 20.)/CV.ACCEL_TO_NM, STOP_BRAKE_THRESHOLD)))):
       self.decel_active = True
       self.decel_val = apply_accel
       if self.decel_val_prev > self.decel_val and not self.done:
@@ -287,21 +291,20 @@ class CarController():
     if self.ccframe % 2 == 0:
       self.acc_counter %= 0xF
       self.acc_counter += 1
+
       if self.hybridEcu:
         new_msg = create_op_acc_1(self.packer, self.accel_active, self.trq_val, self.acc_counter)
-      else:
-        new_msg = create_op_acc_1(self.packer, 0, 25000, self.acc_counter)
-
-      can_sends.append(new_msg)
-      if self.hybridEcu:
+        can_sends.append(new_msg)
         new_msg = create_op_acc_2(self.packer, self.acc_available, self.acc_enabled, self.stop_req, self.go_req, 0,
                                   self.acc_pre_brake, 0, self.decel_val, self.decel_active, self.acc_counter)
+        can_sends.append(new_msg)
       else:
+        new_msg = create_op_acc_1(self.packer, 0, 25000, self.acc_counter)
+        can_sends.append(new_msg)
         new_msg = create_op_acc_2(self.packer, self.acc_available, self.acc_enabled, self.stop_req, self.go_req, self.accel_active,
                                   self.acc_pre_brake, self.trq_val, self.decel_val, self.decel_active, self.acc_counter)
-
-
-      can_sends.append(new_msg)
+        can_sends.append(new_msg)
+  
     if self.ccframe % 6 == 0:
       new_msg = create_op_dashboard(self.packer, self.set_speed, self.cruise_state, self.cruise_icon, op_lead_visible,
                                     op_lead_dist, self.op_long_enable)
