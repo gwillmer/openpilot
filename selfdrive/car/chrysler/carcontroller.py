@@ -266,13 +266,13 @@ class CarController():
         self.gear_final = int(CS.gear_final) - 1
         self.trq_val = (apply_accel*CS.CP.mass + 0.5*0.924*1.225*CS.out.vEgo*CS.out.vEgo)*0.37791/(GEAR_RATIOS[self.gear_final]*AXLE_RATIO*0.85) if self.gear_final < 8 else 0
 
-      if CS.axle_torq_max > self.trq_val > CS.axle_torq_min:
-        self.accel_active = True
-        self.stop_req = False
-        self.decel_val = DEFAULT_DECEL
-      else:
-        self.trq_val = CS.axle_torq_min
-        self.accel_active = False
+      #if CS.axle_torq_max > self.trq_val > CS.axle_torq_min:
+      self.accel_active = True
+      self.stop_req = False
+      self.decel_val = DEFAULT_DECEL
+      #else:
+        #self.trq_val = CS.axle_torq_min
+        #self.accel_active = False
       #if not self.hybridEcu:
       #  self.trq_val /= 15.5  # GEAR_RATO guess for non hybrid?
     else:
