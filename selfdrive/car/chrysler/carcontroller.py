@@ -235,9 +235,9 @@ class CarController():
 
     if enabled and not CS.out.gasPressed and not self.go_req and\
                 (self.stop_req 
-                or (apply_accel <= START_BRAKE_THRESHOLD)
-                or (self.decel_active and ((CS.out.brake > 10.) or (CS.hybrid_power_meter < 0.)) and
-                    (apply_accel < STOP_BRAKE_THRESHOLD))):
+                or (apply_accel <= START_BRAKE_THRESHOLD)):
+    #or (self.decel_active and ((CS.out.brake > 10.) or (CS.hybrid_power_meter < 0.)) and
+    #    (apply_accel < STOP_BRAKE_THRESHOLD))):
     #        (self.stop_req
     #         or (apply_accel <= min(CS.axle_torq_min/CV.ACCEL_TO_NM, START_BRAKE_THRESHOLD))
     #         or (self.decel_active and ((CS.out.brake > 10.) or (CS.hybrid_power_meter < 0.)) and
