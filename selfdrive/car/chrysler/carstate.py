@@ -126,6 +126,8 @@ class CarState(CarStateBase):
       ("DOOR_OPEN_RR", "DOORS", 0),
       ("BRAKE_PEDAL", "BRAKE_2", 0),
       ("GAS_PEDAL_POS", "ACCEL_GAS_22F", 0),
+      ("SPEED_LEFT", "SPEED_1", 0),
+      ("SPEED_RIGHT", "SPEED_1", 0),
       ("WHEEL_SPEED_FL", "WHEEL_SPEEDS", 0),
       ("WHEEL_SPEED_RR", "WHEEL_SPEEDS", 0),
       ("WHEEL_SPEED_RL", "WHEEL_SPEEDS", 0),
