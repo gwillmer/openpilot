@@ -205,7 +205,7 @@ class LeadMpc():
     if lead is not None and lead.status:
       x_lead = lead.dRel
       v_lead = max(0.0, lead.vLead)
-      a_lead = lead.aLeadK
+      a_lead = clip(lead.aLeadK, -5.0, 5.0)
 
       if (v_lead < 0.1 or -a_lead / 2.0 > v_lead):
         v_lead = 0.0
