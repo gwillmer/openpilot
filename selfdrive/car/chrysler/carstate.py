@@ -44,8 +44,9 @@ class CarState(CarStateBase):
     ret.standstill = bool(cp.vl["BRAKE_1"]["STANDSTILL"])
     self.long_accel = cp.vl["INERTIAL_SENSOR"]["LONG_ACCEL"]
     self.hill_accel_raw = self.long_accel - ret.aEgo
-    ret.hillAccel, self.hill_accel_rate = self.update_hill_kf(self.hill_accel_raw)
-
+    self.hill_accel, self.hill_accel_rate = self.update_hill_kf(self.hill_accel_raw)
+    ret.steeringAngleOffsetDeg = self.hill_accel
+    
     ret.leftBlinker = cp.vl["STEERING_LEVERS"]["TURN_SIGNALS"] == 1
     ret.rightBlinker = cp.vl["STEERING_LEVERS"]["TURN_SIGNALS"] == 2
     ret.steeringAngleDeg = cp.vl["STEERING"]["STEER_ANGLE"]
