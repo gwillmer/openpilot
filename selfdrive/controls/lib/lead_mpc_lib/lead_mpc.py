@@ -22,7 +22,7 @@ N = len(MPC_T) - 1
 
 
 def desired_follow_distance(v_ego, v_lead):
-  TR = 1.3
+  TR = 1.8
   G = 9.81
   return (v_ego * TR - (v_lead - v_ego) * TR + v_ego * v_ego / (2 * G) - v_lead * v_lead / (2 * G)) + 4.0
 
