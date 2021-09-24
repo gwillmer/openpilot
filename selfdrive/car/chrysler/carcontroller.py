@@ -14,7 +14,7 @@ from selfdrive.car.chrysler.chryslerlonghelper import cluster_chime, accel_hyste
   cruiseiconlogic, setspeedlogic, SET_SPEED_MIN, DEFAULT_DECEL, STOP_GAS_THRESHOLD, START_BRAKE_THRESHOLD, \
   STOP_BRAKE_THRESHOLD, START_GAS_THRESHOLD, CHIME_GAP_TIME, ACCEL_SCALE, ACCEL_MIN, ACCEL_MAX
 
-GEAR_RATIOS = [4.70,2.84,1.91,1.38,1.00,0.81,0.70,0.58,0.48,0.0,0.0,0.0,0.0]
+GEAR_RATIOS = [4.700,2.842,1.909,1.382,1.00,0.808,0.699,0.580,0.479,0.0,0.0,0.0,0.0]
 AXLE_RATIO = 3.25
 
 class CarController():
@@ -269,7 +269,8 @@ class CarController():
         self.trq_val = apply_accel * CV.ACCEL_TO_NM
       else:
         self.gear_final = int(CS.gear_final) - 1
-        self.trq_val = (apply_accel*CS.CP.mass + 0.5*0.924*1.225*CS.out.vEgo*CS.out.vEgo)*0.37791/(GEAR_RATIOS[self.gear_final]*AXLE_RATIO*0.85) if self.gear_final < 8 else 0
+        self.trq_val = (apply_accel*CS.CP.mass + 0.5*0.924*1.225*CS.out.vEgo*CS.out.vEgo)*0.37791/(CS.gear_ratio*AXLE_RATIO*0.85) if self.gear_final < 8 else 0
+        #self.trq_val = (apply_accel*CS.CP.mass + 0.5*0.924*1.225*CS.out.vEgo*CS.out.vEgo)*0.37791/(GEAR_RATIOS[self.gear_final]*AXLE_RATIO*0.85) if self.gear_final < 8 else 0
 
       #if CS.axle_torq_max > self.trq_val > CS.axle_torq_min:
       self.accel_active = True

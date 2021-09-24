@@ -111,7 +111,13 @@ class CarState(CarStateBase):
     self.accengFaulted = (cp.vl["ACCEL_RELATED_120"]["ACC_ENG_OK"]) == 0
 
 
+    self.shifting = bool(cp.vl["TRANS_1"]["SHIFTING"])
+    self.gear = int(cp.vl["TRANS_1"]["GEAR"])
     self.gear_final = int(cp.vl["TRANS_1"]["GEAR_FINAL"])
+
+    self.gear_ratio = cp.vl["GEAR_RATIO"]["GEAR_RATIO"]
+
+    self.eng_torq = cp.vl["ENGINE_RPM_HEV"]["ENGINE_TORQUE"]
 
     return ret
 
@@ -171,7 +177,11 @@ class CarState(CarStateBase):
       ("ACC_BRAKE_FAIL", "BRAKE_2", 0),
       ("ACC_ENG_OK", "ACCEL_RELATED_120", 0),
       ("ACC_ERROR", "ACC_ERROR", 0),
+      ("GEAR", "TRANS_1", 0),
+      ("GEAR_RATIO", "GEAR_RATIO", 0),
       ("GEAR_FINAL", "TRANS_1", 0),
+      ("SHIFTING", "TRANS_1", 0),
+      ("ENGINE_TORQUE", "ENGINE_RPM_HEV", 0),
       ("LONG_ACCEL", "INERTIAL_SENSOR", 0),
     ]
 
@@ -180,6 +190,7 @@ class CarState(CarStateBase):
       ("BRAKE_2", 50),
       ("EPS_STATUS", 100),
       ("SPEED_1", 100),
+      ("ENGINE_RPM_HEV", 100),
       ("WHEEL_SPEEDS", 50),
       ("STEERING", 100),
       ("ACC_2", 50),
@@ -199,6 +210,7 @@ class CarState(CarStateBase):
       ("ACCEL_RELATED_120", 50),
       ("ACC_ERROR", 0),
       ("INERTIAL_SENSOR", 50),
+      ("GEAR_RATIO", 50),
     ]
 
     if CP.enablehybridEcu:
