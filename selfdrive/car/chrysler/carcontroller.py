@@ -17,6 +17,8 @@ from selfdrive.car.chrysler.chryslerlonghelper import cluster_chime, accel_hyste
 GEAR_RATIOS = [4.700,2.842,1.909,1.382,1.00,0.808,0.699,0.580,0.479,0.0,0.0,0.0,0.0]
 AXLE_RATIO = 3.25
 
+GEAR_RATIOS_COMBINED = [15.12,9.12,6.12,4.43,3.21,2.59,2.24,1.86,1.54,0.0,0.0,0.0,0.0]
+
 class CarController():
   def __init__(self, dbc_name, CP, VM):
     self.apply_steer_last = 0
@@ -268,9 +270,11 @@ class CarController():
       if self.hybridEcu:
         self.trq_val = apply_accel * CV.ACCEL_TO_NM
       else:
-        self.gear_final = int(CS.gear_final) - 1
-        self.trq_val = (apply_accel*CS.CP.mass + 0.5*0.924*1.225*CS.out.vEgo*CS.out.vEgo)*0.37791/(CS.gear_ratio*AXLE_RATIO*0.85) if self.gear_final < 8 else 0
-        #self.trq_val = (apply_accel*CS.CP.mass + 0.5*0.924*1.225*CS.out.vEgo*CS.out.vEgo)*0.37791/(GEAR_RATIOS[self.gear_final]*AXLE_RATIO*0.85) if self.gear_final < 8 else 0
+        if not CS.shifting:
+          self.gear_final = int(CS.gear_final) - 1
+          self.trq_val = (apply_accel*CS.CP.mass + 0.5*0.924*1.225*CS.out.vEgo*CS.out.vEgo)*0.37791/(GEAR_RATIOS_COMBINED[self.gear_final]*0.85) if self.gear_final < 8 else 0
+        else:
+          self.trq_val = (apply_accel*CS.CP.mass + 0.5*0.924*1.225*CS.out.vEgo*CS.out.vEgo)*0.37791/(CS.gear_ratio*0.85)
 
       #if CS.axle_torq_max > self.trq_val > CS.axle_torq_min:
       self.accel_active = True
