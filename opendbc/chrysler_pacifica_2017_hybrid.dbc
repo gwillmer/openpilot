@@ -462,6 +462,9 @@ BO_ 674 d_1: 8 XXX
  SG_ MEASURED : 51|1@0+ (1,0) [0|1] "" XXX
  SG_ PROBABILITY : 15|8@0+ (1,0) [0|255] "" XXX
 
+BO_ 416 GEAR_RATIO: 8 XXX
+ SG_ GEAR_RATIO : 3|12@0+ (0.003115264798,0) [0|1] "" XXX
+
 
 CM_ SG_ 258 UNKNOWN_STEERING "never goes above 4. see if human-applied torque";
 CM_ SG_ 258 STEER_ANGLE "positive is left (counter-clockwise)";
