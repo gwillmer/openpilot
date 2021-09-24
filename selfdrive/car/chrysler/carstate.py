@@ -117,8 +117,6 @@ class CarState(CarStateBase):
 
     self.gear_ratio = cp.vl["GEAR_RATIO"]["GEAR_RATIO"]
 
-    self.eng_torq = cp.vl["ENGINE_RPM_HEV"]["ENGINE_TORQUE"]
-
     return ret
 
   @staticmethod
@@ -181,7 +179,6 @@ class CarState(CarStateBase):
       ("GEAR_RATIO", "GEAR_RATIO", 0),
       ("GEAR_FINAL", "TRANS_1", 0),
       ("SHIFTING", "TRANS_1", 0),
-      ("ENGINE_TORQUE", "ENGINE_RPM_HEV", 0),
       ("LONG_ACCEL", "INERTIAL_SENSOR", 0),
     ]
 
@@ -190,7 +187,6 @@ class CarState(CarStateBase):
       ("BRAKE_2", 50),
       ("EPS_STATUS", 100),
       ("SPEED_1", 100),
-      ("ENGINE_RPM_HEV", 100),
       ("WHEEL_SPEEDS", 50),
       ("STEERING", 100),
       ("ACC_2", 50),
