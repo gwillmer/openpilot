@@ -235,7 +235,15 @@ class CarController():
     self.accel_lim = apply_accel
     apply_accel = accel_rate_limit(self.accel_lim, self.accel_lim_prev, CS.out.standstill)
 
-    START_BRAKE_THRESHOLD = min(-0.5*0.924*1.225*CS.out.vEgo*CS.out.vEgo/CS.CP.mass, -0.05)
+    if (CS.out.vEgo < 1.0 and apply_accel < 0.5):
+      START_BRAKE_THRESHOLD = 0.5
+    elif (CS.out.vEgo < 3.75 and apply_accel < 0.25):
+      START_BRAKE_THRESHOLD = 0.25
+    elif (CS.out.vEgo < 6.0 and apply_accel < 0.1):
+      START_BRAKE_THRESHOLD = 0.1
+    else:  
+      START_BRAKE_THRESHOLD = min(-0.5*0.924*1.225*CS.out.vEgo*CS.out.vEgo/CS.CP.mass, -0.05)
+    
     START_GAS_THRESHOLD = START_BRAKE_THRESHOLD + 0.05
     
     if enabled and not CS.out.gasPressed and not self.go_req and\
