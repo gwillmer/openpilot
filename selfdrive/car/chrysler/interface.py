@@ -39,9 +39,9 @@ class CarInterface(CarInterfaceBase):
     ret.lateralTuning.pid.kfBP = [0.]
     ret.lateralTuning.pid.kfV = [0.00005]   # full torque for 10 deg at 80mph means 0.00007818594
     
-    ret.steerActuatorDelay = 0.01
-    ret.steerRateCost = 0.35
-    ret.steerLimitTimer = 0.7
+    ret.steerActuatorDelay = 0.1
+    ret.steerRateCost = 0.5
+    ret.steerLimitTimer = 0.5
 
     if candidate in (CAR.JEEP_CHEROKEE, CAR.JEEP_CHEROKEE_2019):
       ret.wheelbase = 2.91  # in meters
