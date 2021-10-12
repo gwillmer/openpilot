@@ -102,14 +102,10 @@ class CarController():
       elif self.car_fingerprint in (CAR.PACIFICA_2019_HYBRID, CAR.PACIFICA_2020, CAR.JEEP_CHEROKEE_2019):
         if CS.out.vEgo < (CS.CP.minSteerSpeed - 3.0):
           self.gone_fast_yet = False  # < 14.5m/s stock turns off this bit, but fine down to 13.5
-    else:
-      moving_fast = True
-      self.gone_fast_yet = True
-      
-    lkas_active = moving_fast and enabled
+      lkas_active = moving_fast and enabled
 
-    if not lkas_active:
-      apply_steer = 0
+      if not lkas_active:
+        apply_steer = 0
 
     self.steer_rate_limited = new_steer != apply_steer
     self.apply_steer_last = apply_steer
@@ -158,7 +154,7 @@ class CarController():
 
     # LKAS_HEARTBIT is forwarded by Panda so no need to send it here.
     # frame is 100Hz (0.01s period)
-    if (self.ccframe % 2 == 0) and wp_type != 2:  # 0.02s period
+    if (self.ccframe % 2 == 0) and wp_type != 2:  # 0.25s period
       new_msg = create_lkas_hud(
           self.packer, CS.out.gearShifter, lkas_active,
           self.hud_count, self.steer_type)
