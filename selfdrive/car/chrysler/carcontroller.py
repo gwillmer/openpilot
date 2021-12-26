@@ -26,6 +26,7 @@ class CarController():
     self.hud_count = 0
     self.car_fingerprint = CP.carFingerprint
     self.gone_fast_yet = False
+    self.torq_enabled = False
     self.steer_rate_limited = False
     self.timer = 0
     self.steerErrorMod = False
@@ -37,6 +38,8 @@ class CarController():
     self.lead_dist_at_stop = 0
     self.hybridEcu = CP.enablehybridEcu
     self.full_range_steer = Params().get_bool('LkasFullRangeAvailable')
+    self.moving_fast = False
+    self.min_steer_check = not self.full_range_steer
     self.mango_mode_active = self.full_range_steer
     #OPLong starts here
     self.op_long_enable = CP.openpilotLongitudinalControl
@@ -68,6 +71,8 @@ class CarController():
     self.done = False
     self.gear_final = 0
 
+    
+
     self.packer = CANPacker(dbc_name)
 
   def update(self, enabled, CS, actuators, pcm_cancel_cmd, hud_alert, op_lead_rvel, op_lead_visible, op_lead_dist, long_starting):
@@ -95,24 +100,40 @@ class CarController():
     apply_steer = apply_toyota_steer_torque_limits(new_steer, self.apply_steer_last,
                                                    CS.out.steeringTorqueEps, CarControllerParams)
 
-    if not self.mango_mode_active:
-      moving_fast = CS.out.vEgo > CS.CP.minSteerSpeed  # for status message
+    low_steer_models = self.car_fingerprint in (CAR.JEEP_CHEROKEE, CAR.PACIFICA_2017_HYBRID, CAR.PACIFICA_2018, CAR.PACIFICA_2018_HYBRID)
+    if not self.min_steer_check:
+      self.moving_fast = True
+      self.torq_enabled = enabled or low_steer_models
+    elif low_steer_models:
+      self.moving_fast = not CS.out.steerError and CS.lkas_active
+      self.torq_enabled = self.torq_enabled or CS.torq_status > 1
+    else:
+      self.moving_fast = CS.out.vEgo > CS.CP.minSteerSpeed  # for status message
       if CS.out.vEgo > (CS.CP.minSteerSpeed - 0.5):  # for command high bit
-        self.gone_fast_yet = True
-      elif self.car_fingerprint in (CAR.PACIFICA_2019_HYBRID, CAR.PACIFICA_2020, CAR.JEEP_CHEROKEE_2019):
-        if CS.out.vEgo < (CS.CP.minSteerSpeed - 3.0):
-          self.gone_fast_yet = False  # < 14.5m/s stock turns off this bit, but fine down to 13.5
-      lkas_active = moving_fast and enabled
+        self.torq_enabled = True
+      elif CS.out.vEgo < (CS.CP.minSteerSpeed - 3.0):
+        self.torq_enabled = False  # < 14.5m/s stock turns off this bit, but fine down to 13.5
 
-      if not lkas_active:
-        apply_steer = 0
+    
+    #if not self.mango_mode_active:
+    #  moving_fast = CS.out.vEgo > CS.CP.minSteerSpeed  # for status message
+    #  if CS.out.vEgo > (CS.CP.minSteerSpeed - 0.5):  # for command high bit
+    #    self.gone_fast_yet = True
+    #  elif self.car_fingerprint in (CAR.PACIFICA_2019_HYBRID, CAR.PACIFICA_2020, CAR.JEEP_CHEROKEE_2019):
+    #    if CS.out.vEgo < (CS.CP.minSteerSpeed - 3.0):
+    #      self.gone_fast_yet = False  # < 14.5m/s stock turns off this bit, but fine down to 13.5
+        
+    lkas_active = self.moving_fast and enabled
+
+    if not lkas_active:
+      apply_steer = 0
 
     self.steer_rate_limited = new_steer != apply_steer
     self.apply_steer_last = apply_steer
     self.steer_type = wp_type
 
     if wp_type != 2:
-      self.steerErrorMod = CS.steerError
+      self.steerErrorMod = CS.out.steerError
       if self.steerErrorMod:
         self.steer_type = int(0)
     
@@ -163,7 +184,7 @@ class CarController():
     if self.ccframe % 25 == 0:
       self.hud_count += 1
 
-    new_msg = create_lkas_command(self.packer, int(apply_steer), lkas_active, CS.lkas_counter)
+    new_msg = create_lkas_command(self.packer, int(apply_steer), self.torq_enabled, CS.lkas_counter)
     can_sends.append(new_msg)
 
 

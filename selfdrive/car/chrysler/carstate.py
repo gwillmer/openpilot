@@ -19,6 +19,8 @@ class CarState(CarStateBase):
 
   def update(self, cp, cp_cam):
 
+    min_steer_check = not Params().get_bool('LkasFullRangeAvailable')
+
     ret = car.CarState.new_message()
 
     ret.doorOpen = any([cp.vl["DOORS"]["DOOR_OPEN_FL"],
@@ -65,7 +67,9 @@ class CarState(CarStateBase):
     ret.steeringTorque = cp.vl["EPS_STATUS"]["TORQUE_DRIVER"]/4
     ret.steeringTorqueEps = cp.vl["EPS_STATUS"]["TORQUE_MOTOR"]
     ret.steeringPressed = abs(ret.steeringTorque) > STEER_THRESHOLD/4
-    self.steerError = cp.vl["EPS_STATUS"]["LKAS_STEER_FAULT"] == 4
+    
+    self.lkas_active = cp.vl["EPS_STATUS"]["LKAS_ACTIVE"] == 1
+    ret.steerError = cp.vl["EPS_STATUS"]["LKAS_STEER_FAULT"] == 1 or (min_steer_check and not self.lkas_active and ret.vEgo > self.CP.minSteerSpeed)
 
     ret.genericToggle = bool(cp.vl["STEERING_LEVERS"]["HIGH_BEAM_FLASH"])
 
@@ -75,6 +79,8 @@ class CarState(CarStateBase):
 
     self.lkas_counter = cp_cam.vl["LKAS_COMMAND"]["COUNTER"]
     self.lkas_status_ok = cp_cam.vl["LKAS_HEARTBIT"]["LKAS_BUTTON_LED"]
+    self.torq_status = cp.vl["EPS_STATUS"]["TORQ_STATUS"]
+
     if self.CP.enablehybridEcu:
        if cp.vl["HYBRID_ECU"]["VEH_ON"] == 1:
          self.veh_on_timer += 1
@@ -148,7 +154,9 @@ class CarState(CarStateBase):
       ("TORQUE_DRIVER", "EPS_STATUS", 0),
       ("DRIVER_TAKEOVER", "EPS_STATUS", 0),
       ("TORQUE_MOTOR", "EPS_STATUS", 0),
-      ("LKAS_STEER_FAULT", "EPS_STATUS", 0),
+      ("LKAS_STEER_FAULT", "EPS_STATUS", 1),
+      ("LKAS_ACTIVE", "EPS_STATUS", 1),
+      ("TORQ_STATUS", "EPS_STATUS", 1),
       ("COUNTER", "EPS_STATUS", -1),
       ("TRACTION_OFF", "TRACTION_BUTTON", 0),
       ("SEATBELT_DRIVER_UNLATCHED", "SEATBELT_STATUS", 0),
