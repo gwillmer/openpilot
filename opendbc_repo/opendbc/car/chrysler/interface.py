@@ -75,7 +75,7 @@ class CarInterface(CarInterfaceBase):
         ret.lateralTuning.pid.kpV, ret.lateralTuning.pid.kiV = [[0.15, 0.30], [0.03, 0.05]]
         ret.lateralTuning.pid.kf = 0.00006
 
-      ret.alphaLongitudinalAvailable = False # candidate not in HYBRID_CARS
+      ret.alphaLongitudinalAvailable = True # candidate not in HYBRID_CARS
 
     # Jeep
     elif candidate in (CAR.JEEP_GRAND_CHEROKEE, CAR.JEEP_GRAND_CHEROKEE_2019):

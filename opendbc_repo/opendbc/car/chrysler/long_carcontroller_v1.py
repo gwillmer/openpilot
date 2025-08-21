@@ -25,12 +25,12 @@ TORQ_BRAKE_MAX = -0.1
 BRAKE_CHANGE = 0.06
 
 ## COMMA
-TIRE_SIZE = [275, 55, 20] # 275/55R20
+TIRE_SIZE = [245, 50, 20] # Pacifica 245/50R20
 # https://x-engineer.org/calculate-wheel-radius/
 WHEEL_RADIUS = 0.95 * ((TIRE_SIZE[2] * 25.4 / 2) + (TIRE_SIZE[0] * TIRE_SIZE[1] / 100)) / 1000
 WHEEL_CIRCUMFERENCE = math.tau * WHEEL_RADIUS
 # https://web.archive.org/web/20180116135154/https://www.ramtrucks.com/2019/ram-1500.html
-CdA = 13.0 / 10.764 # CdA = frontal drag coefficient x area (ft^2 converted to m^2)
+CdA = 0.924 # Find source -  CdA = frontal drag coefficient x area (ft^2 converted to m^2)
 # https://www.epa.gov/compliance-and-fuel-economy-data/data-cars-used-testing-fuel-economy
 ROLLING_RESISTANCE_COEFF = 46.31 / 5500 # Target Coef A (lbf) / Equivalent Test Weight (lbs.)
 GRAVITY = 9.81 # m/s^2
